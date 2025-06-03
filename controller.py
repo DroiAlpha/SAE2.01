@@ -39,6 +39,8 @@ app.route('/Graphiques')
 
 app.route('/Evolution')
 
+app.route('/Donnees')
+
 # ------- OPTIONNELS ----------#
 
 app.route('/connexion')
