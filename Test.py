@@ -63,18 +63,17 @@ def diagramme_circle(liste: list, nom: str, labels: list):
 
 # ------------- DIAGRAMME COURBE -----------------#
 
-def diagramme_courbe(valeurs: list, labels: list, titre: str, nom_serie: str):
+def diagramme_courbe(valeurs: list, titre: str):
     """
     Cette fonction va créer un diagramme courbe
     On peut utiliser cette fonction directement pour mettre
     le diagramme dans le site web
     """
-    plt.plot(labels, valeurs, marker='o', color='cyan', label=nom_serie)
+    plt.plot(valeurs, marker='o', color='cyan')
     plt.title(titre)
-    plt.legend()
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    #plt.show()
+    plt.show()
     plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
@@ -89,34 +88,32 @@ labels = ["1er", "2eme", "3eme", "4eme"]
 diagramme_circle(Liste2, "Test", labels)
 
 valeurs = [7,4,2,5,9]
-labels = ['Élément 1', 'Élément 2', 'Élément 3', 'Élément 4', 'Élément 5']
 titre = "Test"
-serie = "Serie 1"
-diagramme_courbe(valeurs, labels, titre, serie)
+diagramme_courbe(valeurs, titre)
 
 # --------- TEST SEABORN ----------------#
 
 
-sns.set_theme(style='ticks')
+# sns.set_theme(style='ticks')
 
-def sns_barplot(liste: list):
-    data = pd.Series(liste)
-    sns.countplot(x=data)
-    #plt.show()
+# def sns_barplot(liste: list):
+#     data = pd.Series(liste)
+#     sns.countplot(x=data)
+#     plt.show()
 
-Liste = [1, 2, 1, 1, 1, 4, 5, 6, 6]
-sns_barplot(Liste)
+# Liste = [1, 2, 1, 1, 1, 4, 5, 6, 6]
+# sns_barplot(Liste)
 
-def sns_displot(liste: list):
-    data = pd.Series(liste)
-    sns.displot(x=data)
-    #plt.show()
+# def sns_displot(liste: list):
+#     data = pd.Series(liste)
+#     sns.displot(x=data)
+#     plt.show()
 
-Liste = [uniform(0,1.5) for _ in range(0,10000)]
-sns_displot(Liste)
+# Liste = [uniform(0,1.5) for _ in range(0,10000)]
+# sns_displot(Liste)
 
 # ----------------- CARTE ---------------------#
 
-m = f.Map(location=(48.525, 2.385  ))
+# m = f.Map(location=(48.525, 2.385  ))
 
-m.save("templates/map.html")
+# m.save("templates/map.html")
