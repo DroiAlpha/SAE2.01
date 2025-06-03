@@ -33,16 +33,26 @@ def apropos():
     # Affichage du template
     return render_template('apropos.html')
 
-app.route('/Carte')
+@app.route('/Carte')
+def map():
+    """
+    Route permettant d'aller a la carte
+    """
+    return render_template('map.html')
 
-app.route('/Graphiques')
+@app.route('/Graphiques')
 
-app.route('/Evolution')
+@app.route('/Evolution')
 
-app.route('/Donnees')
+@app.route('/Donnees')
 
 # ------- OPTIONNELS ----------#
 
-app.route('/connexion')
+@app.route('/connexion')
 
-app.route('/forum')
+@app.route('/forum')
+def forum():
+    pass
+
+if __name__ == '__main__':
+    app.run(debug=True)
