@@ -1,23 +1,28 @@
-Comment on va procéder pour la SAE 2.01 : 
-    - on utilise une approche MVC (modèle-vue-controleur)
-    - on fera tout en meme temps
-    - ATTENTION POUR LE MODELE : FAIRE UNE CLASSE
+# SAE2.01 - README.md
 
-Répartition : 
-    - Massi et Willy -> modèle : faire les différentes méthodes pour communiquer avec la base de données
-    - Théo et Amaury -> controleur : faire la liaison entre le modèle et la vue
-    - Clémence et Idriss -> vue : faire les pages
+## Comment on va procéder pour la SAE 2.01 ?
+  - On utilise une architecture MVC (Modèle-Vue-Contrôleur)
+  - On développera en même temps chacune des couches
+  - ATTENTION POUR LE MODELE : FAIRE UNE CLASSE
 
-Taches principales : 
-    - création de la maquette :
-        . à quoi vont ressembler les pages
-        . quelles seront les différentes fonctionnalités du site
-    - création du site -> approche MVC
-    - tests et validation
+## Répartition des couches et des tâches : 
+  - Massi et Willy -> Modèle : faire les différentes méthodes pour communiquer avec la base de données
+  - Théo et Amaury -> Contrôleur : faire la liaison entre le modèle et la vue
+  - Clémence et Idriss -> Vue : faire les pages HTML, le style CSS et éventuellement des animations JS
 
-Comment tout faire en meme temps ? -> la maquette
-    - tout part de là : on se basera dessus pour faire notre IHM
-    (vue -> programmer littéralement la maquette sans accès à la base de données ; controleur -> on aura les différentes routes grace à la maquette ; modèle -> comme on saura quelles données on veut avec la maquette, on saura quelles méthodes faire)
-    - s'il y a des modifications -> PREVENIR TOUT LE MONDE ET EN DISCUTER
+## Tâches principales : 
+  - Création de la maquette sur Canva :
+      * Quelles seront les différentes fonctionnalités du site Web ?
+      * Quelle sera la structure des pages Web ?
+      * À quoi ressembleront les pages du site ?
+  - Création du site -> Approche MVC
+  - Réalisation de tests et validation des codes
 
-    EN GROS -> NE PAS SE JETER DANS LE CODE ET BIEN FAIRE LA MAQUETTE
+## Comment développer chacune des couches en même temps ? -> Grâce à la maquette
+  - Tout part de la maquette, on se basera dessus pour faire notre IHM :
+    - Vue -> programmer littéralement la maquette sans accès à la base de données
+    - Contrôleur -> on aura les différentes routes grace à la maquette
+    - Modèle -> comme on saura quelles données on veut avec la maquette, on saura quelles méthodes faire
+  - Si vous voulez faire ou donner des suggestions de modifications -> PREVENIR TOUT LE MONDE POUR EN DISCUTER
+
+> EN RÉSUMÉ -> NE PAS SE JETER DANS DÉVELOPPEMENT DU CODE ET BIEN FAIRE LA MAQUETTE EN AMONT
