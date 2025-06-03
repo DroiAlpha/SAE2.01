@@ -24,8 +24,6 @@ def accueil():
     # Affichage du template
     return render_template('index.html')
 
-app.route('/donnees', methods=['GET', 'POST'])
-
 # Route pour la page d'à propos "apropos.html"
 @app.route('/apropos')
 def apropos():
@@ -34,6 +32,14 @@ def apropos():
     """
     # Affichage du template
     return render_template('apropos.html')
+
+app.route('/Carte')
+
+app.route('/Graphiques')
+
+app.route('/Evolution')
+
+# ------- OPTIONNELS ----------#
 
 app.route('/connexion')
 
