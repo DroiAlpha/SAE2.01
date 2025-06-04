@@ -11,6 +11,21 @@ def acces_chroniques():
     arr = np.array(info)
     return arr
 
+def filtre(colonne, filtre):
+    chroniques = acces_chroniques()
+    L = []
+    for c in chroniques:
+        if c[colonne] == filtre:
+            L.append(c['volume'])
+    return pd.DataFrame(L)
+
+def rel_plot(liste, titre):
+    sns.relplot(
+        data=liste, kind="line"
+    )
+    plt.title(titre)
+    plt.show()
+
 # print(len(acces_chroniques()))
 # print(acces_chroniques()[0]['volume'])
 
@@ -27,9 +42,7 @@ for i in chroniques:
 # diagramme_courbe(liste_volumes,  titre)
 
 liste_volumes = pd.DataFrame(liste_volumes)
-def rel_plot(liste):
-    sns.relplot(
-        data=liste, kind="line"
-    )
-    plt.show()
-rel_plot(liste_volumes)
+
+# rel_plot(filtre('annee', 2020), "Volume sur l'annee 2020")
+# rel_plot(filtre('libelle_usage', 'EAU POTABLE'), "Volume d'eau potable")
+rel_plot(filtre('libelle_departement', 'Meurthe-et-Moselle'), "Volume à Meurthe-et-Moselle")
