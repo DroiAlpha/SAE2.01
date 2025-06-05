@@ -7,7 +7,10 @@ import base64
 import pandas as pd
 from random import *
 import folium as f
-
+from folium.plugins import HeatMap, HeatMapWithTime
+import numpy as np
+from bordel_Amaury import acces_chroniques
+from math import exp
 # -------------- HISTOGRAMME -------------------#
 
 def fake_histogramme(liste):
@@ -80,40 +83,82 @@ def diagramme_courbe(valeurs: list, titre: str):
 
 # -------------- TESTS --------------------#
 
-Liste = [2, 3, 4, 6, 1]
-fake_histogramme(Liste)
+# Liste = [2, 3, 4, 6, 1]
+# fake_histogramme(Liste)
 
-Liste2 = [7,2,4,5]
-labels = ["1er", "2eme", "3eme", "4eme"]
-diagramme_circle(Liste2, "Test", labels)
+# Liste2 = [7,2,4,5]
+# labels = ["1er", "2eme", "3eme", "4eme"]
+# diagramme_circle(Liste2, "Test", labels)
 
-valeurs = [7,4,2,5,9]
-titre = "Test"
-diagramme_courbe(valeurs, titre)
+# valeurs = [7,4,2,5,9]
+# titre = "Test"
+# diagramme_courbe(valeurs, titre)
 
 # --------- TEST SEABORN ----------------#
 
 
-# sns.set_theme(style='ticks')
+sns.set_theme(style='ticks')
 
-# def sns_barplot(liste: list):
-#     data = pd.Series(liste)
-#     sns.countplot(x=data)
-#     plt.show()
+def sns_displot(liste: list):
+    data = pd.Series(liste)
+    sns.displot(data)
+    plt.show()
 
-# Liste = [1, 2, 1, 1, 1, 4, 5, 6, 6]
-# sns_barplot(Liste)
 
-# def sns_displot(liste: list):
-#     data = pd.Series(liste)
-#     sns.displot(x=data)
-#     plt.show()
 
-# Liste = [uniform(0,1.5) for _ in range(0,10000)]
-# sns_displot(Liste)
+def sns_pie(data: list, labels: list):
+    plt.figure(figsize=(6,6)) 
+    plt.pie(data, labels=labels)
+    plt.show()
 
+def sns_courbe(data:list):
+    sns.relplot(
+    data, kind="line")
+    plt.show()
+
+def sns_horizontalbarplot(data: list,category, value ):
+    
+    df = pd.DataFrame(data)
+    
+    f, ax = plt.subplots(figsize=(6, 15))
+    
+    # X et Y sont les différentes colonnes que l'on souhaite
+    sns.barplot(x=value, y=category, data=df, ax=ax)
+
+    # * Y a que dieu qui sait ce que les trois lignes en dessous font
+    ax.legend(ncol=2, loc="lower right", frameon=True, ) # mettre les légendes
+    ax.set(xlim=(0, 24), ylabel="Contribution", xlabel="test") 
+    sns.despine(left=True, bottom=True) # ! JSP
+    
+    plt.show()
+
+don = [
+    {"cook": "chatgpt", "value": 10},
+    {"cook": "amaurrrr", "value": 15},
+    {"cook": "idriss", "value": 5}
+]
+
+Liste = [uniform(0,1.5) for _ in range(0,10000)]
+data = [30, 20, 50] # Données juste pour try
+labels = ['A', 'B', 'C'] # Nom pour chaque part.
+sns_horizontalbarplot(don, 'cook' , 'value' )
+# sns_displot(Liste) 
+# sns_pie(data, labels)
+# sns_courbe(data)
 # ----------------- CARTE ---------------------#
 
-# m = f.Map(location=(48.525, 2.385  ))
+chroniques = acces_chroniques()
 
-# m.save("templates/map.html")
+# ! J'ai pas réussi à faire celle qui est timed si quelqu'un a la foi de faire
+
+def heatmap(data: np.array, heat: str, map_obj: map):
+    """Fonction qui crée une heatmap selon l'argument que l'on souhaite"""
+    
+    localisation = [[c['latitude'], c['longitude'], c[heat]] for c in data]
+    HeatMap(localisation, radius=15).add_to(map_obj)
+
+m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
+
+heatmap(chroniques, 'volume', m)
+
+m.save("map.html")
