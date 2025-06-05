@@ -40,11 +40,18 @@ def map():
     """
     return render_template('map.html')
 
-@app.route('/Graphiques')
+@app.route('/Graphiques', methods=['GET', 'POST'])
+def graphiques():
+    """
+    Route pour voir les graphiques
+    """
+    
 
 @app.route('/Evolution')
 
+
 @app.route('/Donnees')
+
 
 # ------- OPTIONNELS ----------#
 
