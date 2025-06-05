@@ -1,48 +1,34 @@
 import pandas as pd
-import psycopg2
+# Ajoute en haut du fichier
+from sqlalchemy import create_engine
 
-# Chemin relatif vers la base de données PostgreSQL
-DBPARAMS = {
-    "database": "eaufrance",
-    "user": "yuri",
-    "password": "yuri",
-    "host": "10.10.47.80",
-    "port": 5432
-}
+# Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
+engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.68.12:5432/eaufrance")
 
-def connect_db():
-    return psycopg2.connect(**DBPARAMS)
-
-def fct_condition(filtres: dict) -> str:
+def fct_condition(filtres: dict):
     conditions = []
     params = []
     for cle, valeur in filtres.items():
         if valeur:
             conditions.append(f"{cle} = %s")
             params.append(valeur)
-# Cette ligne join les conditions de filtrage (comme des 'colonne = valeur') avec "AND" pour former une clause WHERE complète.
-# Exemple : "colonne1 = noob" AND "colonne2 = clemence" on voit les données de "noob" et de "clémence"
-    return " AND ".join(conditions), params
+    return " AND ".join(conditions), [tuple(params)]
+
 
 
 def obtenir_valeurs_distinctes(table, colonne):
-    conn = connect_db()
     requete = f"""
     SELECT DISTINCT
         {colonne}
     FROM
         {table}
     """
-    resultat = pd.read_sql_query(requete, conn)
-    conn.close()
+    resultat = pd.read_sql_query(requete, engine)
     return resultat.to_dict(orient='records')
+
 
 # Fonction générique pour obtenir des données filtrées
 def obtenir_donnees_filtrees(table, colonnes, jointures, filtres) -> pd.DataFrame:
-    """
-    Méthode permettant d'obtenir des données qui seront filtrées
-    """
-    conn = connect_db()
     condi_where, params = fct_condition(filtres)
     requete = f"""
     SELECT
@@ -53,65 +39,71 @@ def obtenir_donnees_filtrees(table, colonnes, jointures, filtres) -> pd.DataFram
     WHERE
         {condi_where};
     """
-    info = pd.read_sql_query(requete, conn, params=params)
-    conn.close()
+    # Correction ici : transformer params en tuple
+    info = pd.read_sql_query(requete, engine, params=tuple(params))
     return info
 
 # Exemple d'utilisation pour la table Ouvrage
 def obtenir_info_ouvrage(filtres):
-    table = "Ouvrage"
+    table = "ouvrages"
     colonnes = [
-        'code_ouvrage', #varchar300 PK
-        'nom_ouvrage', #varchar200
-        'date_exploitation_debut', #DATE
-        'date_exploitation_fin', #DATE
-        'code_type_milieu', #varchar100
-        'libelle_departement', #VARCHAR(150)
-        'longitude', #DECIMAL(9,6)
-        'latitude', #DECIMAL(9,6)
-        'code_departement'# FK
+        'ouvrages.code_ouvrage', #varchar300 PK
+        'ouvrages.nom_ouvrage', #varchar200
+        'ouvrages.date_exploitation_debut', #DATE
+        'ouvrages.date_exploitation_fin', #DATE
+        'ouvrages.code_type_milieu', #varchar100
+        'departement.libelle_departement', #VARCHAR(150)
+        'ouvrages.longitude', #DECIMAL(9,6)
+        'ouvrages.latitude', #DECIMAL(9,6)
+        'ouvrages.code_departement'# FK
     ]
     jointures = """
-    INNER JOIN Departement ON Departement.code_departement = Ouvrage.code_departement
+    INNER JOIN departement ON departement.code_departement = ouvrages.code_departement
     """
     return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
 
 # Exemple d'utilisation pour la table Point Prelevement
 def obtenir_info_prelevement(filtres):
-    table = "Point_Prelevement"
+    table = "pt_prelevement"
     colonnes = [
-        'code_point_prelevement', #varchar300 PK
-        'code_ouvrage', #Varchar200
-        'nom_point_prelevement', #varchar200
-        'date_exploitation_debut', #DATE
-        'code_type_milieu', #varchar100
-        'libelle_nature', #varchar150
-        'code_departement'#FK
+        'pt_prelevement.code_point_prelevement', #varchar300 PK
+        'pt_prelevement.code_ouvrage', #Varchar200
+        'pt_prelevement.nom_point_prelevement', #varchar200
+        'pt_prelevement.date_exploitation_debut', #DATE
+        'pt_prelevement.code_type_milieu', #varchar100
+        'pt_prelevement.libelle_nature', #varchar150
+        'pt_prelevement.code_departement', #FK
+        'departement.libelle_departement' # pour avoir le nom du département
     ]
     jointures = """
-    INNER JOIN Departement ON Departement.code_departement = Point_Prelevement.code_departement
+    INNER JOIN departement ON departement.code_departement = pt_prelevement.code_departement
     """
     return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
 
 # Exemple d'utilisation pour la table Commune
 def obtenir_info_commune(filtres):
-    table = "Commune"
+    table = "commune"
     colonnes = [
-        'nom_commune', #varchar500
-        'code_commune_insee', #PK
-        'code_departement'#FK
+        'commune.nom_commune', #varchar500
+        'commune.code_commune_insee', #PK
+        'commune.code_departement'#FK
     ]
     jointures = """
-    INNER JOIN Departement ON Departement.code_departement = Commune.code_departement
+    INNER JOIN departement ON departement.code_departement = commune.code_departement
     """
     return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
 
 # Exemple d'utilisation pour la table Departement
 def obtenir_info_departement(filtres):
-    table = "Departement"
+    table = "departement"
     colonnes = [
-        "code_departement", #PK
-        "libelle_departement", #varchar500
+        "departement.code_departement", #PK
+        "departement.libelle_departement", #varchar500
     ]
     jointures = """"""  # Pas de jointure pour cette table
     return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+
+#print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
+#print(obtenir_info_prelevement({"nom_point_prelevement": "ELECTRICITE DE FRANCE"}))
+#print(obtenir_info_commune({"nom_commune": "Craincourt"}))
+#print(obtenir_info_departement({"code_departement": "12"}))
