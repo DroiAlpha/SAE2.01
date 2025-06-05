@@ -1,9 +1,10 @@
 import pandas as pd
 # Ajoute en haut du fichier
 from sqlalchemy import create_engine
+from flask_caching import Cache
 
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
-engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.68.12:5432/eaufrance")
+engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.41.217:5432/eaufrance")
 
 def fct_condition(filtres: dict):
     conditions = []
@@ -12,7 +13,7 @@ def fct_condition(filtres: dict):
         if valeur:
             conditions.append(f"{cle} = %s")
             params.append(valeur)
-    return " AND ".join(conditions), [tuple(params)]
+    return " AND ".join(conditions), tuple(params)
 
 
 
@@ -43,8 +44,21 @@ def obtenir_donnees_filtrees(table, colonnes, jointures, filtres) -> pd.DataFram
     info = pd.read_sql_query(requete, engine, params=tuple(params))
     return info
 
+# Fonction générique pour obtenir des données
+def obtenir_donnees(table, colonnes, jointures) -> pd.DataFrame:
+    requete = f"""
+    SELECT
+        {', '.join(colonnes)}
+    FROM
+        {table}
+    {jointures}
+    """
+    # Correction ici : transformer params en tuple
+    info = pd.read_sql_query(requete, engine)
+    return info
+
 # Exemple d'utilisation pour la table Ouvrage
-def obtenir_info_ouvrage(filtres):
+def obtenir_info_ouvrage(filtres=None):
     table = "ouvrages"
     colonnes = [
         'ouvrages.code_ouvrage', #varchar300 PK
@@ -60,10 +74,13 @@ def obtenir_info_ouvrage(filtres):
     jointures = """
     INNER JOIN departement ON departement.code_departement = ouvrages.code_departement
     """
-    return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    if filtres:
+        return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    else:
+        return obtenir_donnees(table, colonnes, jointures)
 
 # Exemple d'utilisation pour la table Point Prelevement
-def obtenir_info_prelevement(filtres):
+def obtenir_info_prelevement(filtres=None):
     table = "pt_prelevement"
     colonnes = [
         'pt_prelevement.code_point_prelevement', #varchar300 PK
@@ -78,10 +95,13 @@ def obtenir_info_prelevement(filtres):
     jointures = """
     INNER JOIN departement ON departement.code_departement = pt_prelevement.code_departement
     """
-    return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    if filtres:
+        return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    else:
+        return obtenir_donnees(table, colonnes, jointures)
 
 # Exemple d'utilisation pour la table Commune
-def obtenir_info_commune(filtres):
+def obtenir_info_commune(filtres=None):
     table = "commune"
     colonnes = [
         'commune.nom_commune', #varchar500
@@ -91,19 +111,29 @@ def obtenir_info_commune(filtres):
     jointures = """
     INNER JOIN departement ON departement.code_departement = commune.code_departement
     """
-    return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    if filtres:
+        return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    else:
+        return obtenir_donnees(table, colonnes, jointures)
 
 # Exemple d'utilisation pour la table Departement
-def obtenir_info_departement(filtres):
+def obtenir_info_departement(filtres=None):
     table = "departement"
     colonnes = [
         "departement.code_departement", #PK
         "departement.libelle_departement", #varchar500
     ]
     jointures = """"""  # Pas de jointure pour cette table
-    return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    if filtres:
+        return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
+    else:
+        return obtenir_donnees(table, colonnes, jointures)
 
-#print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
-#print(obtenir_info_prelevement({"nom_point_prelevement": "ELECTRICITE DE FRANCE"}))
-#print(obtenir_info_commune({"nom_commune": "Craincourt"}))
-#print(obtenir_info_departement({"code_departement": "12"}))
+print(obtenir_info_ouvrage())
+print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
+print(obtenir_info_prelevement())
+print(obtenir_info_prelevement({"nom_point_prelevement": "ELECTRICITE DE FRANCE"}))
+print(obtenir_info_commune())
+print(obtenir_info_commune({"nom_commune": "Craincourt"}))
+print(obtenir_info_departement())
+print(obtenir_info_departement({"code_departement": "12"}))
