@@ -72,7 +72,7 @@ def graphiques():
     histogramme = None # a modifier
 
     return render_template(
-        'Carte.html',
+        'Graphiques.html',
         diagramme_circulaire = diagramme_circulaire,
         histogramme = histogramme
     )
