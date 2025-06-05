@@ -53,7 +53,7 @@ def map():
     """
     return render_template('map.html')
 
-@app.route('/Graphiques', methods=['GET', 'POST']) # a modifier
+@app.route('/Graphiques', methods=['GET', 'POST']) # a modifier en priorite
 def graphiques():
     """
     Route pour afficher histogramme + diagramme circulaire
