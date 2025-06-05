@@ -4,7 +4,7 @@
 
 from flask import Flask, render_template, request
 import matplotlib
-
+from flask_caching import Cache
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -12,11 +12,19 @@ import matplotlib
 # Déclaration de l'application Flask
 app = Flask(__name__)
 
+# TKT la team
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_HOST'] = 'localhost'
+app.config['CACHE_REDIS_PORT'] = 6379
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+cache = Cache(app)
+
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
 
 # Route pour la page d'accueil "index.html"
 @app.route("/")
+# @cache.cached(timeout=300, query_string=True)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
