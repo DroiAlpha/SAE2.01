@@ -18,11 +18,17 @@ class Chroniques:
         return arr
     
     def donnees(self):
+        """
+        (GROS) Probleme : Ya pas une donnée avec true comme prelevement_ecrasant
+        """
         L = []
+        #c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
         for c in self.acces_chroniques():
-            if c['code_statut_volume'] == 1 or c['code_statut_volume'] == 2 and c['code_qualification_volume'] == 1 and c['prelevement_ecrasant'] == True:
+            if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
+                print(c)
                 L.append(c)
         return L
+    
     def colonnes(self):
         L = []
         for i in self.acces_chroniques()[0]:
@@ -93,8 +99,13 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
 #         print(i)
 
 chroniques = Chroniques()
+print(len(chroniques.acces_chroniques()))
+print(len(chroniques.donnees()))
 
-print(chroniques.colonnes())
+# for c in chroniques.acces_chroniques():
+#     print(c['code_qualification_volume'])
+
+#print(chroniques.colonnes())
 
 # print(get_volume())
 
@@ -104,5 +115,5 @@ print(chroniques.colonnes())
 # rel_plot(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'), "Volume à Meurthe-et-Moselle")
 # print(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'))
 
-ouvrage = 'OPR0000000101'
-diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))
+ouvrage = 'OPR0000000102'
+#diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))
