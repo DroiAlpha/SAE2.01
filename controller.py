@@ -1,10 +1,11 @@
 #####################################################################
 # IMPORTATION DES MODULES
 #####################################################################
-
+# ! Il vous faut installer : pip install flask-caching redis
 from flask import Flask, render_template, request
 import matplotlib
-
+from flask_caching import Cache
+import time
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -12,11 +13,25 @@ import matplotlib
 # Déclaration de l'application Flask
 app = Flask(__name__)
 
+# Import le server Redis de la vm 
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
+app.config['CACHE_REDIS_PORT'] = 6379
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+cache = Cache(app)
+
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
 
+# Route pour tester si Redis fonctionne si ça fonctionne la page va montrer le même temps pendant 10 secondes puis changer
+@app.route("/test_cache")
+@cache.cached(timeout=10) 
+def test_cache():
+    return f"Time: {time.time()}"
+
 # Route pour la page d'accueil "index.html"
 @app.route("/")
+@cache.cached(timeout=300)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
