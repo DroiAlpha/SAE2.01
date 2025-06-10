@@ -98,9 +98,9 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
 #     if i['volume'] == max(liste_volumes):
 #         print(i)
 
-chroniques = Chroniques()
-print(len(chroniques.acces_chroniques()))
-print(len(chroniques.donnees()))
+# chroniques = Chroniques()
+# print(len(chroniques.acces_chroniques()))
+# print(len(chroniques.donnees()))
 
 # for c in chroniques.acces_chroniques():
 #     print(c['code_qualification_volume'])
