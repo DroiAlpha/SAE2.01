@@ -25,7 +25,6 @@ class Chroniques:
         #c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
         for c in self.acces_chroniques():
             if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
-                print(c)
                 L.append(c)
         return L
     
@@ -90,15 +89,10 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-# print(len(acces_chroniques()))
-# print(acces_chroniques()[0]['volume'])
+# ---------------------------------------------------------------------- #
 
-# print(max(liste_volumes))
-# for i in chroniques:
-#     if i['volume'] == max(liste_volumes):
-#         print(i)
+chroniques = Chroniques()
 
-# chroniques = Chroniques()
 # print(len(chroniques.acces_chroniques()))
 # print(len(chroniques.donnees()))
 
@@ -109,11 +103,10 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
 
 # print(get_volume())
 
-
 # rel_plot(filtre('annee', 2020), "Volume sur l'annee 2020")
 # rel_plot(filtre('libelle_usage', 'EAU POTABLE'), "Volume d'eau potable")
 # rel_plot(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'), "Volume à Meurthe-et-Moselle")
 # print(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'))
 
 ouvrage = 'OPR0000000102'
-#diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))
+# diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))

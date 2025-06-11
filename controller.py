@@ -6,6 +6,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
+from Graphiques import *
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -83,8 +84,9 @@ def graphiques():
 
     filtered_values = None
 
-    diagramme_circulaire = None # a modifier
-    histogramme = None # a modifier
+    diagramme_circulaire = sns_pie(filtered_values) # a modifier
+
+    histogramme = sns_horizontalbarplot(filtered_values) # a modifier
 
     return render_template(
         'Graphiques.html',
@@ -103,7 +105,7 @@ def evolution():
 
     nom_ouvrage = request.form.get("nom_ouvrage")
     donnees = None # a modifier
-    graphique = None # a modifier
+    graphique = sns_courbe(donnees) # a modifier
 
     return render_template(
         'Evolution.html',

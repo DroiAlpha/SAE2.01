@@ -9,8 +9,11 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from bordel_Amaury import acces_chroniques
+from bordel_Amaury import *
 from math import exp
+from io import BytesIO
+import base64
+
 # -------------- HISTOGRAMME -------------------#
 
 def fake_histogramme(liste):
@@ -100,21 +103,38 @@ def diagramme_courbe(valeurs: list, titre: str):
 sns.set_theme(style='ticks')
 
 def sns_displot(liste: list):
+    """
+    Utilisation de base64 et io pour pouvoir mettre l'image
+    dans une page web
+    """
     data = pd.Series(liste)
     sns.displot(data)
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
     plt.show()
-
-
+    plt.close()
+    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{image_base64}'
 
 def sns_pie(data: list, labels: list):
     plt.figure(figsize=(6,6)) 
     plt.pie(data, labels=labels)
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
     plt.show()
+    plt.close()
+    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{image_base64}'
 
 def sns_courbe(data:list):
     sns.relplot(
     data, kind="line")
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
     plt.show()
+    plt.close()
+    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{image_base64}'
 
 def sns_horizontalbarplot(data: list,category, value ):
     
@@ -129,8 +149,12 @@ def sns_horizontalbarplot(data: list,category, value ):
     ax.legend(ncol=2, loc="lower right", frameon=True, ) # mettre les légendes
     ax.set(xlim=(0, 24), ylabel="Contribution", xlabel="test") 
     sns.despine(left=True, bottom=True) # ! JSP
-    
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
     plt.show()
+    plt.close()
+    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{image_base64}'
 
 don = [
     {"cook": "chatgpt", "value": 10},
@@ -142,12 +166,12 @@ Liste = [uniform(0,1.5) for _ in range(0,10000)]
 data = [30, 20, 50] # Données juste pour try
 labels = ['A', 'B', 'C'] # Nom pour chaque part.
 sns_horizontalbarplot(don, 'cook' , 'value' )
-# sns_displot(Liste) 
-# sns_pie(data, labels)
-# sns_courbe(data)
+sns_displot(Liste) 
+sns_pie(data, labels)
+sns_courbe(data)
 # ----------------- CARTE ---------------------#
 
-chroniques = acces_chroniques()
+chroniques = Chroniques()
 
 # ! J'ai pas réussi à faire celle qui est timed si quelqu'un a la foi de faire
 
@@ -159,6 +183,6 @@ def heatmap(data: np.array, heat: str, map_obj: map):
 
 m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 
-heatmap(chroniques, 'volume', m)
+heatmap(chroniques.donnees(), 'volume', m)
 
 m.save("map.html")
