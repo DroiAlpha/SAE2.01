@@ -6,8 +6,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <!-- En-tête principal -->
   {% include 'header.html' %}
+  <!-- Contenu principal de la page -->
   {% block content %}{% endblock %}
+  <!-- Pied de page -->
   {% include 'footer.html' %}
 </body>
 </html>

@@ -1,10 +1,21 @@
+<!-- En-tête principal -->
 <header>
+    <!-- Logo et nom du site -->
     <div class="logo">
         <img src="logo.png" alt="Logo Prélèv’eau" />
         <span>Prélèv’eau</span>
     </div>
+    <!-- Bouton pour ouvrir la barre de navigation principale -->
     <button class="menu-toggle" aria-label="Ouvrir le menu">
         &#9776;
     </button>
-    {% include 'navar.html' %}
+    <!-- Barre de navigation principale -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="{{ url_for('accueil') }}" class="active">Accueil</a></li>
+            <li><a href="{{ url_for('tableau-de-bord') }}">Tableau de bord</a></li>
+            <li><a href="{{ url_for('jeu-de-donnees') }}">Jeu de données</a></li>
+            <li><a href="{{ url_for('a-propos') }}">À propos</a></li>
+        </ul>
+    </nav>
 </header>
