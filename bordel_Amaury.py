@@ -60,6 +60,19 @@ class Chroniques:
         for c in self.donnees():
             if c['code_ouvrage'] == ouvrage:
                 return c['nom_ouvrage']
+
+    def ouvrage(self, nom_ouvrage):
+        L = []
+        for c in self.donnees():
+            if c['nom_ouvrage'] == nom_ouvrage:
+                L.append(c['volume'])
+        return L
+
+    def usage(self):
+        e = set()
+        for c in self.acces_chroniques():
+            e.add(c['libelle_usage'])
+        return list(e)
             
 #######################################################
 
@@ -93,6 +106,10 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
 
 chroniques = Chroniques()
 
+print(chroniques.colonnes())
+
+#print(chroniques.usage())
+
 # print(len(chroniques.acces_chroniques()))
 # print(len(chroniques.donnees()))
 
@@ -108,5 +125,5 @@ chroniques = Chroniques()
 # rel_plot(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'), "Volume à Meurthe-et-Moselle")
 # print(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'))
 
-ouvrage = 'OPR0000000102'
+# ouvrage = 'OPR0000000102'
 # diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))

@@ -104,7 +104,7 @@ def evolution():
     """
 
     nom_ouvrage = request.form.get("nom_ouvrage")
-    donnees = None # a modifier
+    donnees = None # Model.ouvrage(nom_ouvrage)
     graphique = sns_courbe(donnees) # a modifier
 
     return render_template(
@@ -128,8 +128,8 @@ def donnees():
 
     filtered_values = None # a modifier avec le modele
 
-    annee = None # a modifier avec le modele
-    usage = None # a modifier avec le modele
+    annee = None # Model.annee()
+    usage = None # Model.usage()
     commune = None # a modifier avec le modele
     departement = None # a modifier avec le modele
     ouvrage = None # a modifier avec le modele
