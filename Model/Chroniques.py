@@ -54,3 +54,16 @@ class Chroniques:
         for c in self.donnees():
             if c['code_ouvrage'] == ouvrage:
                 return c['nom_ouvrage']
+
+    def ouvrage(self, nom_ouvrage):
+        L = []
+        for c in self.donnees():
+            if c['nom_ouvrage'] == nom_ouvrage:
+                L.append(c['volume'])
+        return L
+
+    def usage(self):
+        e = set()
+        for c in self.acces_chroniques():
+            e.add(c['libelle_usage'])
+        return list(e)
