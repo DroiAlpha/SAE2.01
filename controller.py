@@ -8,7 +8,7 @@ from flask_caching import Cache
 import time
 from Graphiques import *
 import Model.model as db  
-import Model.Chroniques as c
+from Model.Chroniques import *
 #####################################################################
 # CONFIGURATION
 #####################################################################
