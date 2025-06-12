@@ -7,6 +7,7 @@ import matplotlib
 from flask_caching import Cache
 import time
 from Graphiques import *
+import Model.model as db  
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -82,7 +83,7 @@ def graphiques():
         "nom_ouvrage" : request.form.get("nom_ouvrage")
     }
 
-    filtered_values = None
+    filtered_values = 
 
     diagramme_circulaire = sns_pie(filtered_values) # a modifier
 
@@ -104,7 +105,7 @@ def evolution():
     """
 
     nom_ouvrage = request.form.get("nom_ouvrage")
-    donnees = None # Model.ouvrage(nom_ouvrage)
+    donnees = db.obtenir_info_ouvrage(nom_ouvrage)
     graphique = sns_courbe(donnees) # a modifier
 
     return render_template(
@@ -112,39 +113,6 @@ def evolution():
         graphique = graphique
     )
 
-@app.route('/Donnees', methods=['GET', 'POST']) # a modifier
-def donnees():
-    """
-    Route pour les données
-    IL FAUT MODIFIER DES TRUCS AVEC LE MODELE
-    """
-    filters = {
-        "annee" : request.form.get("annee"),
-        "libelle_usage" : request.form.get("libelle_usage"),
-        "nom_commune" : request.form.get("nom_commune"),
-        "libelle_departement" : request.form.get("libelle_departement"),
-        "nom_ouvrage" : request.form.get("nom_ouvrage")
-    }
-
-    filtered_values = None # a modifier avec le modele
-
-    annee = None # Model.annee()
-    usage = None # Model.usage()
-    commune = None # Model.obtenir_info_commune()
-    departement = None # Model.obtenir_info_departement()
-    ouvrage = None # Model.obtenir_info_ouvrage()
-
-    is_empty = filtered_values.empty
-
-    return render_template(
-        'donnees.html',
-        annee = annee,
-        usage = usage,
-        commune = commune,
-        departement = departement,
-        ouvrage = ouvrage,
-        is_empty = is_empty
-    )
 
 # ------- OPTIONNELS ----------#
 

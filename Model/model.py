@@ -1,7 +1,6 @@
 import pandas as pd
 # Ajoute en haut du fichier
 from sqlalchemy import create_engine
-from flask_caching import Cache
 
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
 engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.41.217:5432/eaufrance")
