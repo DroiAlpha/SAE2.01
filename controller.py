@@ -8,6 +8,7 @@ from flask_caching import Cache
 import time
 from Graphiques import *
 import Model.model as db  
+import Model.Chroniques as c
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -56,12 +57,25 @@ def apropos():
 def render_filtered_template(template, filter_fct, form_keys):
     """
     Fonction générique de transmission des valeurs filtrées d'un tableau
+    Je dois mettre les données des 3 tableaux (chroniques, pt_prelevement, ouvrage)
+    DANS la fonction
     """
     if request.method == 'POST':
         filters = {key: request.form.get(key) for key in form_keys}
         filtered_values = filter_fct(filters)
         return render_template(template, filtered_values=filtered_values, **filters)
-    return render_template(template)
+    
+    chroniques = Chroniques()
+
+    tab_chroniques = chroniques.filtre()
+    tab_pt_prelev = db.obtenir_info_prelevement()
+    tab_ouvrages = db.obtenir_info_ouvrage()
+
+    return render_template(template,
+                           tab_chroniques = tab_chroniques,
+                           tab_ouvrages = tab_ouvrages,
+                           tab_pt_prelev = tab_pt_prelev
+                           )
 
 @app.route('/Carte',  methods=['GET', 'POST'])
 def map():
