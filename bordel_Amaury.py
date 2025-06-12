@@ -42,19 +42,32 @@ class Chroniques:
                 L.append(c['volume'])
         return pd.DataFrame(L)
     
-    def annee(self, colonne, filtre):
+    def annee(self):
         chroniques = self.donnees()
+        colonne = 'code_ouvrage'
+        filtre = 'OPR0000000102'
         L = []
         for c in chroniques:
             if c[colonne] == filtre:
                 L.append(c['annee'])
         return L
     
-    def min_annee(self, colonne, filtre):
-        return str(min(self.annee(colonne, filtre)))
+    def data_evo(self, usage):
+        annees = self.annee() # c une liste
+        L = []
+        for annee in annees:
+            temp = 0
+            for d in self.donnees():
+                if d['annee'] == annee and d['libelle_usage'] == usage:
+                    temp += d['volume']
+            L.append(temp)
+        return L
+
+    def min_annee(self):
+        return str(min(self.annee()))
     
-    def max_annee(self, colonne, filtre):
-        return str(max(self.annee(colonne, filtre)))
+    def max_annee(self):
+        return str(max(self.annee()))
     
     def nom_ouvrage(self, ouvrage):
         for c in self.donnees():
@@ -70,10 +83,20 @@ class Chroniques:
 
     def usage(self):
         e = set()
-        for c in self.acces_chroniques():
+        for c in self.donnees():
             e.add(c['libelle_usage'])
         return list(e)
-            
+    
+    def usage2(self):
+        L = []
+        for usage in self.usage():
+            i = 0
+            for elt in self.donnees():
+                if elt['libelle_usage'] == usage:
+                    i += 1
+            L.append(i)
+        return L
+                
 #######################################################
 
 def rel_plot(liste, titre):
@@ -106,11 +129,8 @@ def diagramme_courbe(valeurs: list, titre: str, text: list):
 
 chroniques = Chroniques()
 
-print(chroniques.colonnes())
-
-#print(chroniques.usage())
-
 # print(len(chroniques.acces_chroniques()))
+
 # print(len(chroniques.donnees()))
 
 # for c in chroniques.acces_chroniques():
@@ -121,9 +141,10 @@ print(chroniques.colonnes())
 # print(get_volume())
 
 # rel_plot(filtre('annee', 2020), "Volume sur l'annee 2020")
+
 # rel_plot(filtre('libelle_usage', 'EAU POTABLE'), "Volume d'eau potable")
 # rel_plot(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'), "Volume à Meurthe-et-Moselle")
 # print(chroniques.filtre('libelle_departement', 'Meurthe-et-Moselle'))
 
 # ouvrage = 'OPR0000000102'
-# diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee('code_ouvrage', ouvrage) + " et " + chroniques.max_annee('code_ouvrage', ouvrage), chroniques.annee('code_ouvrage', ouvrage))
+# diagramme_courbe(chroniques.filtre('code_ouvrage', ouvrage), "Evolution de " + chroniques.nom_ouvrage(ouvrage) + " entre " + chroniques.min_annee() + " et " + chroniques.max_annee(), chroniques.annee())
