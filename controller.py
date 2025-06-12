@@ -63,7 +63,7 @@ def render_filtered_template(template, filter_fct, form_keys):
         return render_template(template, filtered_values=filtered_values, **filters)
     return render_template(template)
 
-@app.route('/Carte')
+@app.route('/Carte',  methods=['GET', 'POST'])
 def map():
     """
     Route permettant d'aller a la carte

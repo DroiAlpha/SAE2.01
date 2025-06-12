@@ -9,7 +9,7 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from bordel_Amaury import *
+from Model.Chroniques import Chroniques
 from math import exp
 from io import BytesIO
 import base64
@@ -183,6 +183,9 @@ def heatmap(data: np.array, heat: str, map_obj: map):
 
 m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 
-heatmap(chroniques.donnees(), 'volume', m)
+# heatmap(chroniques.donnees(), 'volume', m)
 
+def map_prelevement(data: np.array, map_obj: map,):
+    """Fonction qui permet d'obtenir une carte"""
+    
 m.save("map.html")
