@@ -5,17 +5,25 @@
         <img src="logo.png" alt="Logo Prélèv’eau" />
         <span>Prélèv’eau</span>
     </div>
-    <!-- Bouton pour ouvrir la barre de navigation principale -->
-    <button class="menu-toggle" aria-label="Ouvrir le menu">
-        &#9776;
-    </button>
+
+    <!-- Titre de la page -->
+    <h1>{{ page_title }}</h1>
+
     <!-- Barre de navigation principale -->
-    <nav class="navbar">
-        <ul>
-            <li><a href="{{ url_for('accueil') }}" class="active">Accueil</a></li>
-            <li><a href="{{ url_for('tableau-de-bord') }}">Tableau de bord</a></li>
-            <li><a href="{{ url_for('jeux-de-donnees') }}">Jeux de données</a></li>
-            <li><a href="{{ url_for('a-propos') }}">À propos</a></li>
-        </ul>
-    </nav>
+    <div class="menu-container">
+        <!-- Bouton pour ouvrir la barre de navigation principale -->
+        <button class="menu-btn">
+            <img src="{{ url_for('static', filename='menu-icon.png') }}" alt="Menu" />
+        </button>
+
+        <!-- Barre de navigation principale -->
+        <nav class="menu-items">
+            <ul>
+                <li><a href="{{ url_for('accueil') }}" class="active">Accueil</a></li>
+                <li><a href="{{ url_for('tableau-de-bord') }}">Tableau de bord</a></li>
+                <li><a href="{{ url_for('jeux-de-donnees') }}">Jeux de données</a></li>
+                <li><a href="{{ url_for('a-propos') }}">À propos</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
