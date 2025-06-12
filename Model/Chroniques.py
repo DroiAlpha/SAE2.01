@@ -21,19 +21,27 @@ class Chroniques:
             if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
                 L.append(c)
         return L
-    
+
+
     def colonnes(self):
         L = []
         for i in self.acces_chroniques()[0]:
             L.append(i)
         return L
     
-    def filtre(self, colonne, filtre):
+    def filtre(self, colonne = None, filtre = None):
+        """
+        Renvoie un dataframe avec les données de chronique
+        On peut filtrer avec des colonnes, mais cela marche sans parametres
+        """
         chroniques = self.donnees()
         L = []
         for c in chroniques:
-            if c[colonne] == filtre:
-                L.append(c['volume'])
+            if colonne and filtre:
+                if c[colonne] == filtre:
+                    L.append(c)
+            else:
+                L.append(c)
         return pd.DataFrame(L)
     
     def filtre_ouv(self, nom_ouvrage):
@@ -82,3 +90,9 @@ class Chroniques:
         for c in self.acces_chroniques():
             e.add(c['libelle_usage'])
         return list(e)
+    
+# ------------- TEST ----------------------#
+
+chroniques = Chroniques()
+
+print(chroniques.filtre())
