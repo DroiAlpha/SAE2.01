@@ -130,9 +130,9 @@ def donnees():
 
     annee = None # Model.annee()
     usage = None # Model.usage()
-    commune = None # a modifier avec le modele
-    departement = None # a modifier avec le modele
-    ouvrage = None # a modifier avec le modele
+    commune = None # Model.obtenir_info_commune()
+    departement = None # Model.obtenir_info_departement()
+    ouvrage = None # Model.obtenir_info_ouvrage()
 
     is_empty = filtered_values.empty
 
@@ -145,7 +145,6 @@ def donnees():
         ouvrage = ouvrage,
         is_empty = is_empty
     )
-
 
 # ------- OPTIONNELS ----------#
 
