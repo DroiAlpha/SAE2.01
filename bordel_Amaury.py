@@ -22,7 +22,6 @@ class Chroniques:
         (GROS) Probleme : Ya pas une donnée avec true comme prelevement_ecrasant
         """
         L = []
-        #c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
         for c in self.acces_chroniques():
             if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
                 L.append(c)
@@ -52,16 +51,17 @@ class Chroniques:
                 L.append(c['annee'])
         return L
     
-    def data_evo(self, usage):
-        annees = self.annee() # c une liste
+    def data_evo(self, usage, exp: int):
+        annees = self.annee()  # c une liste
         L = []
         for annee in annees:
             temp = 0
             for d in self.donnees():
                 if d['annee'] == annee and d['libelle_usage'] == usage:
                     temp += d['volume']
-            L.append(temp)
+            L.append(temp * exp)
         return L
+
 
     def min_annee(self):
         return str(min(self.annee()))
@@ -136,7 +136,11 @@ chroniques = Chroniques()
 # for c in chroniques.acces_chroniques():
 #     print(c['code_qualification_volume'])
 
-#print(chroniques.colonnes())
+# print(chroniques.colonnes())
+
+# for c in chroniques.donnees():
+#     if c['code_statut_instruction'] != 'REA':
+#         print(c['code_statut_instruction'])
 
 # print(get_volume())
 

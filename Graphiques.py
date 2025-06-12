@@ -49,9 +49,30 @@ def sns_pie(data: list, labels: list, titre: str):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-def sns_courbe(data:list, titre: str, x_label: str, y_label: str):
-    sns.relplot(
-    data, kind="line")
+import seaborn as sns
+import matplotlib.pyplot as plt
+import base64
+from io import BytesIO
+import pandas as pd
+
+def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_label: str, y_label: str, label1="Courbe 1", label2="Courbe 2"):
+    df1 = pd.DataFrame({'x': x_values, 'y': data1, 'serie': label1})
+    df2 = pd.DataFrame({'x': x_values, 'y': data2, 'serie': label2})
+    df = pd.concat([df1, df2])
+    sns.relplot(data=df, kind="line", x="x", y="y", hue="serie")
+    plt.title(titre)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
+    plt.show()
+    plt.close()
+    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{image_base64}'
+
+def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: str):
+    df = pd.DataFrame({'x': x_values, 'y': data})
+    sns.relplot(data=df, kind="line", x="x", y="y")
     plt.title(titre)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -95,20 +116,30 @@ don = [
 Liste = [uniform(0,1.5) for _ in range(0,10000)]
 data = [30, 20, 50] # Données juste pour try
 labels = ['A', 'B', 'C'] # Nom pour chaque part.
-sns_horizontalbarplot(don, 'cook' , 'value' )
-sns_displot(Liste, "Titre", "Abscisse", "Ordonnées") 
-sns_pie(data, labels, "Titre")
-sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
+# sns_horizontalbarplot(don, 'cook' , 'value' )
+# sns_displot(Liste, "Titre", "Abscisse", "Ordonnées") 
+# sns_pie(data, labels, "Titre")
+# sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
 
 chroniques = Chroniques()
 
 # ---- DIAGRAMME CIRCULAIRE ---- #
 data_usages = chroniques.usage2()
-sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
+# sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
 
 # ---- HISTOGRAMME ---- #
-data_evo = chroniques.data_evo("EAU POTABLE")
-sns_courbe(data_evo, "Evolution du volume pour eau potable", "Années", "Volume en m^3")
+
+usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
+usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+
+sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
+
+# sns_courbe(usage_1, chroniques.annee(), "Evolution du volume EAU POTABLE", "Annees", "Volumes")
+# sns_courbe(usage_2, chroniques.annee(), "Evolution du volume INDUSTRIE", "Annees", "Volumes")
+
+# for c in chroniques.usage():
+#     data_evo = chroniques.data_evo(c)
+#     sns_courbe(data_evo, chroniques.annee(), "Evolution du volume pour "+c, "Années", "Volume en m^3")
 
 # ----------------- CARTE ---------------------#
 
