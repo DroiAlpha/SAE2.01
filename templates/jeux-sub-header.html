@@ -1,0 +1,13 @@
+<!-- En-tête secondaire -->
+<div class="sub-header">
+  <!-- Boutton pour accéder aux filtres -->
+  <button class="filter-toggle" aria-label="Ouvrir les filtres">☰ Filtres</button>
+  <!-- Barre de navigation secondaire -->
+  <nav class="sub-navbar">
+    <ul>
+      <li><a href="{{ url_for('jeu-chroniques') }}" class="active">Chroniques</a></li>
+      <li><a href="{{ url_for('jeu-ouvrages') }}">Ouvrages</a></li>
+      <li><a href="{{ url_for('jeu-points-de-prelevement') }}">Ponits de prélèvement</a></li>
+    </ul>
+  </nav>
+</div>

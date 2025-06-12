@@ -5,9 +5,8 @@
   <!-- Barre de navigation secondaire -->
   <nav class="sub-navbar">
     <ul>
-      <li><a href="#carte" class="active">Carte</a></li>
-      <li><a href="#graphiques">Graphiques</a></li>
-      <li><a href="#evolution">Évolution</a></li>
+      <li><a href="{{ url_for('carte-des-prelevements') }}" class="active">Carte des prélèvements</a></li>
+      <li><a href="{{ url_for('usages-de-l-eau') }}">Usages de l'eau</a></li>
+      <li><a href="{{ url_for('evolution-temporelle') }}">Évolution temporelle</a></li>
     </ul>
-  </nav>
 </div>
