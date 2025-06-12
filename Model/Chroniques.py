@@ -36,6 +36,21 @@ class Chroniques:
                 L.append(c['volume'])
         return pd.DataFrame(L)
     
+    def filtre_ouv(self, nom_ouvrage):
+        """
+        Retourne une liste de dictionnaires contenant les volumes et années
+        pour un nom d'ouvrage donné.
+        """
+        result = []
+        for c in self.donnees():
+            if c['nom_ouvrage'] == nom_ouvrage:
+                result.append({
+                    "annee": c['annee'],
+                    "volume": c['volume']
+                })
+        return result
+
+    
     def annee(self, colonne, filtre):
         chroniques = self.donnees()
         L = []

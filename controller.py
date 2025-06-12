@@ -70,47 +70,88 @@ def map():
     """
     return render_template('map.html')
 
-@app.route('/Graphiques', methods=['GET', 'POST']) # a modifier en priorite
+@app.route('/Graphiques', methods=['GET', 'POST'])
 def graphiques():
     """
-    Route pour afficher histogramme + diagramme circulaire
+    Route pour afficher histogramme + diagramme circulaire,
+    avec ou sans filtres.
     """
-    filters = {
-        "annee" : request.form.get("annee"),
-        "libelle_usage" : request.form.get("libelle_usage"),
-        "nom_commune" : request.form.get("nom_commune"),
-        "libelle_departement" : request.form.get("libelle_departement"),
-        "nom_ouvrage" : request.form.get("nom_ouvrage")
-    }
+    chroniques = Chroniques()
+    
+    # Données par défaut (non filtrées)
+    donnees = chroniques.donnees()  
+    
+    if request.method == 'POST':
+        # Récupération des filtres depuis le formulaire
+        filters = {
+            "annee": request.form.get("annee"),
+            "libelle_usage": request.form.get("libelle_usage"),
+            "nom_commune": request.form.get("nom_commune"),
+            "libelle_departement": request.form.get("libelle_departement"),
+            "nom_ouvrage": request.form.get("nom_ouvrage")
+        }
 
-    filtered_values = 
+        # Filtrage des données manuellement
+        filtered_data = []
+        
+        for c in donnees:
+            if (not filters["annee"] or str(c["annee"]) == filters["annee"]) and \
+               (not filters["libelle_usage"] or c["libelle_usage"] == filters["libelle_usage"]) and \
+               (not filters["nom_commune"] or c["nom_commune"] == filters["nom_commune"]) and \
+               (not filters["libelle_departement"] or c["libelle_departement"] == filters["libelle_departement"]) and \
+               (not filters["nom_ouvrage"] or c["nom_ouvrage"] == filters["nom_ouvrage"]):
+                filtered_data.append(c)
 
-    diagramme_circulaire = sns_pie(filtered_values) # a modifier
+        # Génération des graphiques à partir des données filtrées
+        diagramme_circulaire = sns_pie(filtered_data)
+        histogramme = sns_horizontalbarplot(filtered_data)
 
-    histogramme = sns_horizontalbarplot(filtered_values) # a modifier
+        return render_template(
+            'Graphiques.html',
+            diagramme_circulaire=diagramme_circulaire,
+            histogramme=histogramme,
+            filters=filters  
+        )
 
+    # Si GET ou aucun filtre
+    diagramme_circulaire = sns_pie(donnees)
+    histogramme = sns_horizontalbarplot(donnees)
+    
     return render_template(
         'Graphiques.html',
-        diagramme_circulaire = diagramme_circulaire,
-        histogramme = histogramme
+        diagramme_circulaire=diagramme_circulaire,
+        histogramme=histogramme,
+        filters=None
     )
 
 
-@app.route('/Evolution', methods=['GET', 'POST']) # a modifier
+@app.route('/Evolution', methods=['GET', 'POST'])
 def evolution():
     """
-    Route pour afficher une courbe d'évolution pour un ouvrage
-    
-    Il faudrait une methode pour n'avoir que les volumes pour 1 ouvrage (avec TOUTES les annees)
+    Route pour afficher une courbe d'évolution pour un ouvrage.
+    L'utilisateur choisit un ouvrage, et la courbe montre les volumes selon les années.
     """
 
-    nom_ouvrage = request.form.get("nom_ouvrage")
-    donnees = db.obtenir_info_ouvrage(nom_ouvrage)
-    graphique = sns_courbe(donnees) # a modifier
+    chroniques = Chroniques()
+    graphique = None
+    nom_ouvrage = None
+
+    if request.method == 'GET':
+        nom_ouvrage = 'AUDELONCOURT'
+
+    elif request.method == 'POST':
+        nom_ouvrage = request.form.get("nom_ouvrage")
+
+    if nom_ouvrage:
+        donnees = chroniques.filtre_ouv(nom_ouvrage)
+        if donnees:
+            df = pd.DataFrame(donnees).sort_values(by='annee')
+            graphique = sns_courbe(df)
 
     return render_template(
         'Evolution.html',
-        graphique = graphique
+        graphique=graphique,
+        nom_ouvrage=nom_ouvrage
     )
 
 

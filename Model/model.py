@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
-engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.41.217:5432/eaufrance")
+engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.81.64:5432/eaufrance")
 
 def fct_condition(filtres: dict):
     conditions = []
@@ -128,11 +128,11 @@ def obtenir_info_departement(filtres=None):
     else:
         return obtenir_donnees(table, colonnes, jointures)
 
-print(obtenir_info_ouvrage())
-print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
-print(obtenir_info_prelevement())
-print(obtenir_info_prelevement({"nom_point_prelevement": "ELECTRICITE DE FRANCE"}))
-print(obtenir_info_commune())
-print(obtenir_info_commune({"nom_commune": "Craincourt"}))
-print(obtenir_info_departement())
-print(obtenir_info_departement({"code_departement": "12"}))
+# print(obtenir_info_ouvrage())
+# print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
+# print(obtenir_info_prelevement())
+# print(obtenir_info_prelevement({"nom_point_prelevement": "ELECTRICITE DE FRANCE"}))
+# print(obtenir_info_commune())
+# print(obtenir_info_commune({"nom_commune": "Craincourt"}))
+# print(obtenir_info_departement())
+# print(obtenir_info_departement({"code_departement": "12"}))

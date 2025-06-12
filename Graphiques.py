@@ -156,19 +156,19 @@ def sns_horizontalbarplot(data: list,category, value ):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-don = [
-    {"cook": "chatgpt", "value": 10},
-    {"cook": "amaurrrr", "value": 15},
-    {"cook": "idriss", "value": 5}
-]
+# don = [
+#     {"cook": "chatgpt", "value": 10},
+#     {"cook": "amaurrrr", "value": 15},
+#     {"cook": "idriss", "value": 5}
+# ]
 
-Liste = [uniform(0,1.5) for _ in range(0,10000)]
-data = [30, 20, 50] # Données juste pour try
-labels = ['A', 'B', 'C'] # Nom pour chaque part.
-sns_horizontalbarplot(don, 'cook' , 'value' )
-sns_displot(Liste) 
-sns_pie(data, labels)
-sns_courbe(data)
+# Liste = [uniform(0,1.5) for _ in range(0,10000)]
+# data = [30, 20, 50] # Données juste pour try
+# labels = ['A', 'B', 'C'] # Nom pour chaque part.
+# sns_horizontalbarplot(don, 'cook' , 'value' )
+# sns_displot(Liste) 
+# sns_pie(data, labels)
+# sns_courbe(data)
 # ----------------- CARTE ---------------------#
 
 chroniques = Chroniques()
