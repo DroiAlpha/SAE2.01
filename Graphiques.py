@@ -9,73 +9,38 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from bordel_Amaury import *
-from math import exp
+from Model.Chroniques import Chroniques
 from io import BytesIO
 import base64
-
+from model.py import obtenir_info_prelevement, obtenir_info_ouvrage 
 # -------------- HISTOGRAMME -------------------#
 
-def fake_histogramme(liste):
+sns.set_theme(style='ticks')
+
+def sns_displot(liste: list, titre: str, x_label: str, y_label: str):
     """
-    Cette fonction crée un histogramme.
-    On peut utiliser cette fonction directement pour mettre un histogramme
+    C'est l'histogramme
+    Utilisation de base64 et io pour pouvoir mettre l'image
     dans une page web
-    Il y aura écrit sur les barres les valeurs des barres, ainsi que les noms des abscisses et ordonnées
     """
-    plt.figure(figsize=(8, 6))
-    bars = plt.bar(range(len(liste)), liste, color='skyblue')
-
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval, int(yval), ha='center', va='bottom')
-
-    # Ajout des labels et du titre
-    plt.xlabel('Abscisses')
-    plt.ylabel('Ordonnées')
-    plt.title('Histogramme Test')
-
+    data = pd.Series(liste)
+    sns.displot(data)
+    plt.title(titre)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    #plt.show() # à retirer si utilisé dans page web
+    plt.show()
     plt.close()
-
-    # Convertion de l'image en format base64 pour l'inclure dans le template
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-# ---------------- DIAGRAMME CIRCULAIRE ----------------------#
-
-def diagramme_circle(liste: list, nom: str, labels: list):
+def sns_pie(data: list, labels: list, titre: str):
     """
-    Cette fonction crée un diagramme circulaire
-    ATTENTION : il faut que le nombre d'éléments de la liste soit égale à au nombre de labels
-    On peut utiliser cette fonction directement pour mettre un diagramme circulaire
-    dans une page web
+    C'est le diagramme circulaire
     """
-    fig, axes = plt.subplots(1, 1, figsize=(5, 5))
-
-    axes.pie(liste, labels=labels, autopct='%.1f%%')
-
-    axes.set_title(nom)
-
-    image_stream = BytesIO()
-    plt.savefig(image_stream, format='png')
-    #plt.show() # à retirer si utilisé dans page web
-    plt.close()
-
-    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    return f'data:image/png;base64,{image_base64}'
-
-# ------------- DIAGRAMME COURBE -----------------#
-
-def diagramme_courbe(valeurs: list, titre: str):
-    """
-    Cette fonction va créer un diagramme courbe
-    On peut utiliser cette fonction directement pour mettre
-    le diagramme dans le site web
-    """
-    plt.plot(valeurs, marker='o', color='cyan')
+    plt.figure(figsize=(6,6)) 
+    plt.pie(data, labels=labels)
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
@@ -84,31 +49,20 @@ def diagramme_courbe(valeurs: list, titre: str):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-# -------------- TESTS --------------------#
+import seaborn as sns
+import matplotlib.pyplot as plt
+import base64
+from io import BytesIO
+import pandas as pd
 
-# Liste = [2, 3, 4, 6, 1]
-# fake_histogramme(Liste)
-
-# Liste2 = [7,2,4,5]
-# labels = ["1er", "2eme", "3eme", "4eme"]
-# diagramme_circle(Liste2, "Test", labels)
-
-# valeurs = [7,4,2,5,9]
-# titre = "Test"
-# diagramme_courbe(valeurs, titre)
-
-# --------- TEST SEABORN ----------------#
-
-
-sns.set_theme(style='ticks')
-
-def sns_displot(liste: list):
-    """
-    Utilisation de base64 et io pour pouvoir mettre l'image
-    dans une page web
-    """
-    data = pd.Series(liste)
-    sns.displot(data)
+def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_label: str, y_label: str, label1="Courbe 1", label2="Courbe 2"):
+    df1 = pd.DataFrame({'x': x_values, 'y': data1, 'serie': label1})
+    df2 = pd.DataFrame({'x': x_values, 'y': data2, 'serie': label2})
+    df = pd.concat([df1, df2])
+    sns.relplot(data=df, kind="line", x="x", y="y", hue="serie")
+    plt.title(titre)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
     plt.show()
@@ -116,19 +70,12 @@ def sns_displot(liste: list):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-def sns_pie(data: list, labels: list):
-    plt.figure(figsize=(6,6)) 
-    plt.pie(data, labels=labels)
-    image_stream = BytesIO()
-    plt.savefig(image_stream, format='png')
-    plt.show()
-    plt.close()
-    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    return f'data:image/png;base64,{image_base64}'
-
-def sns_courbe(data:list):
-    sns.relplot(
-    data, kind="line")
+def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: str):
+    df = pd.DataFrame({'x': x_values, 'y': data})
+    sns.relplot(data=df, kind="line", x="x", y="y")
+    plt.title(titre)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
     plt.show()
@@ -156,6 +103,10 @@ def sns_horizontalbarplot(data: list,category, value ):
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
+# ------------------------------------------------------------- #
+# ---------------------- TESTS -------------------------------- #
+# ------------------------------------------------------------- #
+
 don = [
     {"cook": "chatgpt", "value": 10},
     {"cook": "amaurrrr", "value": 15},
@@ -165,10 +116,31 @@ don = [
 Liste = [uniform(0,1.5) for _ in range(0,10000)]
 data = [30, 20, 50] # Données juste pour try
 labels = ['A', 'B', 'C'] # Nom pour chaque part.
-sns_horizontalbarplot(don, 'cook' , 'value' )
-sns_displot(Liste) 
-sns_pie(data, labels)
-sns_courbe(data)
+# sns_horizontalbarplot(don, 'cook' , 'value' )
+# sns_displot(Liste, "Titre", "Abscisse", "Ordonnées") 
+# sns_pie(data, labels, "Titre")
+# sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
+
+chroniques = Chroniques()
+
+# ---- DIAGRAMME CIRCULAIRE ---- #
+data_usages = chroniques.usage2()
+# sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
+
+# ---- HISTOGRAMME ---- #
+
+usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
+usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+
+sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
+
+# sns_courbe(usage_1, chroniques.annee(), "Evolution du volume EAU POTABLE", "Annees", "Volumes")
+# sns_courbe(usage_2, chroniques.annee(), "Evolution du volume INDUSTRIE", "Annees", "Volumes")
+
+# for c in chroniques.usage():
+#     data_evo = chroniques.data_evo(c)
+#     sns_courbe(data_evo, chroniques.annee(), "Evolution du volume pour "+c, "Années", "Volume en m^3")
+
 # ----------------- CARTE ---------------------#
 
 chroniques = Chroniques()
@@ -185,4 +157,36 @@ m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 
 heatmap(chroniques.donnees(), 'volume', m)
 
+
+import folium as f
+
+def map_prelevement(map_obj):
+    """
+    Ajoute les ouvrages sur la carte Folium avec les noms des points de prélèvement associés.
+    """
+    ouvrages = db.obtenir_info_ouvrage()
+    prelevements = db.obtenir_info_prelevement()
+    
+    for _, row in ouvrages.iterrows():
+        lat = row['latitude']
+        lon = row['longitude']
+
+        if pd.notna(lat) and pd.notna(lon):
+            popup_html = f'''
+                <b>{row['nom_ouvrage']}</b><br>
+                Code ouvrage : {row['code_ouvrage']}<br>
+                Département : {row['libelle_departement']}
+            '''
+            popup = f.Popup(popup_html, max_width=150, min_width=50)
+
+            # Taille réduite pour l'icône
+            icon = f.Icon(color='blue', icon='tint', prefix='fa')
+
+            f.Marker(
+                location=(lat, lon),
+                popup=popup,
+                icon=icon
+            ).add_to(map_obj)
+
+m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 m.save("map.html")
