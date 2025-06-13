@@ -12,7 +12,7 @@ import numpy as np
 from Model.Chroniques import Chroniques
 from io import BytesIO
 import base64
-
+from model.py import obtenir_info_prelevement, obtenir_info_ouvrage 
 # -------------- HISTOGRAMME -------------------#
 
 sns.set_theme(style='ticks')
