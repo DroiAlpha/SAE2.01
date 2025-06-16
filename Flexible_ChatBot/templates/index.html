@@ -12,6 +12,10 @@
         <h1>Informations sur les prélèvements d'eau</h1>
         <p>Posez vos questions à notre assistant virtuel</p>
     </header>
+<<<<<<< HEAD
+    
+    <div class="container">
+=======
     <div class="container">
         <div class="chat-container">
             <div id="chat"></div>
@@ -21,6 +25,7 @@
             </div>
         </div>
         
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
         <div class="info-container">
             <section>
                 <h2>Qu'est-ce qu'un prélèvement d'eau ?</h2>
@@ -47,6 +52,72 @@
             </section>
         </div>
     </div>
+<<<<<<< HEAD
+    
+    <!-- Icône du chatbot -->
+    <div class="chatbot-icon" id="chatbotIcon">
+        <i class="fas fa-robot"></i>
+    </div>
+    
+    <!-- Popup du chatbot -->
+    <div class="chatbot-popup" id="chatbotPopup">
+        <div class="chatbot-header">
+            <span>Assistant Virtuel</span>
+            <span class="chatbot-close" id="chatbotClose">&times;</span>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <i class="fas fa-robot bot-icon"></i>
+                <div class="message-content">Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider concernant les prélèvements d'eau ?</div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Posez votre question ici...">
+            <button id="chatbotSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    
+    <!-- Overlay pour le fond assombri -->
+    <div class="overlay" id="chatbotOverlay"></div>
+    
+    <script>
+        // Éléments du DOM
+        const chatbotIcon = document.getElementById('chatbotIcon');
+        const chatbotPopup = document.getElementById('chatbotPopup');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+        const chatbotOverlay = document.getElementById('chatbotOverlay');
+        
+        // Ouvrir le chatbot
+        chatbotIcon.addEventListener('click', () => {
+            chatbotPopup.style.display = 'flex';
+            chatbotOverlay.style.display = 'block';
+            chatbotInput.focus();
+        });
+        
+        // Fermer le chatbot
+        chatbotClose.addEventListener('click', () => {
+            chatbotPopup.style.display = 'none';
+            chatbotOverlay.style.display = 'none';
+        });
+        
+        // Fermer en cliquant sur l'overlay
+        chatbotOverlay.addEventListener('click', () => {
+            chatbotPopup.style.display = 'none';
+            chatbotOverlay.style.display = 'none';
+        });
+        
+        // Envoyer un message
+        async function sendChatbotMessage() {
+            const message = chatbotInput.value.trim();
+            
+            if (!message) return;
+            
+            // Ajouter le message de l'utilisateur
+            chatbotMessages.innerHTML += `
+=======
 
     <script>
         async function sendMessage() {
@@ -58,10 +129,40 @@
             
             // Ajout du message de l'utilisateur
             chat.innerHTML += `
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
                 <div class="message user-message">
                     <i class="fas fa-user user-icon"></i>
                     <div class="message-content">${message}</div>
                 </div>`;
+<<<<<<< HEAD
+            
+            chatbotInput.value = '';
+            
+            // Faire défiler vers le bas
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
+            try {
+                // Envoyer la requête au serveur (remplacez par votre endpoint réel)
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Ajouter la réponse du bot
+                chatbotMessages.innerHTML += `
+                    <div class="message bot-message">
+                        <i class="fas fa-robot bot-icon"></i>
+                        <div class="message-content">${data.response || "Désolé, je n'ai pas pu traiter votre demande."}</div>
+                    </div>`;
+            } catch (error) {
+                chatbotMessages.innerHTML += `
+                    <div class="message error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="message-content">Erreur de connexion avec le serveur</div>
+=======
             input.value = "";
             
             // Faire défiler vers le bas
@@ -94,10 +195,23 @@
                     <div class="message error-message">
                         <i class="fas fa-exclamation-triangle"></i>
                         <div class="message-content">Impossible de contacter le serveur</div>
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
                     </div>`;
             }
             
             // Faire défiler vers le bas après la réponse
+<<<<<<< HEAD
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+        
+        // Envoyer avec le bouton
+        chatbotSend.addEventListener('click', sendChatbotMessage);
+        
+        // Envoyer avec la touche Entrée
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatbotMessage();
+=======
             chat.scrollTop = chat.scrollHeight;
         }
         
@@ -105,6 +219,7 @@
         document.getElementById("userInput").addEventListener("keypress", function(e) {
             if (e.key === "Enter") {
                 sendMessage();
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
             }
         });
     </script>
