@@ -23,11 +23,17 @@ from model.chroniques import *
 # Déclaration de l'application Flask
 app = Flask(__name__)
 
-# Import le server Redis de la VM 
-app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
-app.config['CACHE_REDIS_PORT'] = 6379
-app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+# Importation du serveur Redis hébergé sur la VM pour le cache
+
+# Décommenter les lignes suivantes pour utiliser RedisCache
+# app.config['CACHE_TYPE'] = 'RedisCache'
+# app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
+# app.config['CACHE_REDIS_PORT'] = 6379
+# app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+
+# Utilisation du cache simple pour le développement local
+app.config['CACHE_TYPE'] = 'SimpleCache'
+
 cache = Cache(app)
 
 # Assure la compatibilité de Matplotlib avec Flask
@@ -65,7 +71,7 @@ def accueil():
 ################################
 
 # Route pour la page de la carte des prélèvements en eau "tab_carte.html"
-@app.route('tableau-bord/carte-prelevements',  methods=['GET', 'POST'])
+@app.route('/tableau-bord/carte-prelevements',  methods=['GET', 'POST'])
 def carte():
     """
     Fonction de définition de l'adresse de la page de la carte des prélèvements en eau "tab_carte.html"
@@ -253,7 +259,7 @@ def a_propos_manuel():
 
 # Route pour la page d'à propos sur l'équipe projet "a_propos_equipe.html"
 @app.route('/a-propos/notre-equipe-projet')
-def a_propos_manuel():
+def a_propos_equipe():
     """
     Fonction de définition de l'adresse de la page d'à propos sur l'équipe projet "a_propos_equipe.html"
     Cette page présente l'équipe projet, ses membres et leurs rôles dans le développement de l'application
