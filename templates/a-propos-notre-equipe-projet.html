@@ -1,7 +1,52 @@
+
 <!-- Structure commune -->
 {% extends 'base.html' %}
 <!-- Contenu de la page Notre équipe projet -->
 {% block content %}
-<!-- En-tête secondaire -->
-{% include 'a-propos-sub-header.html' %}
+  {% block title %}À propos – Notre équipe{% endblock %}
+
+  <!-- En-tête secondaire -->
+  {% include 'a-propos-sub-header.html' %}
+
+  <section class="about-intro">
+    <h1>À propos de notre équipe</h1>
+    <p>Nous sommes un groupe de 6 étudiants en informatique en 1ʳᵉ année de BUT, passionnés par les nouvelles technologies. Notre objectif : concevoir une application de visualisation des prélèvements d’eau claire, de la base de données aux graphiques interactifs.</p>
+  </section>
+
+  <section class="team">
+    <h2>Notre équipe</h2>
+    <div class="team-grid">
+      
+      <div class="team-member">
+        <h3>Clémence</h3>
+        <p>Ma Citation – "Dans la vie, rien n’est à craindre, tout est à comprendre." – Marie Curie</p>
+      </div>
+
+      <div class="team-member">
+        <h3>Willy</h3>
+        <p>Ma Citation – Fait ou ne fait pas il n'y a pas d'essaie.</p>
+      </div>
+
+      <div class="team-member">
+        <h3>Amaury</h3>
+        <p>Ma Citation – Quitters never win and winners never quit.</p>
+      </div>
+
+      <div class="team-member">
+        <h3>Idriss</h3>
+        <p>Ma Citation – La meilleure façon de prédire l’avenir, c’est de l’inventer.</p>
+      </div>
+
+      <div class="team-member">
+        <h3>Massy</h3>
+        <p>Ma Citation - La passion facilite le travail.</p>
+      </div>
+
+      <div class="team-member">
+        <h3>Théo</h3>
+        <p>Cartographe – Il a implémenté la carte interactive Leaflet/Folium et intégré les marqueurs de prélèvement sur OpenStreetMap.</p>
+      </div>
+
+    </div>
+  </section>
 {% endblock %}
