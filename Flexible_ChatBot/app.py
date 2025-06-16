@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from chatbot import ask_bot # This import will now work without vectordb
+from chatbot import ask_bot 
 
 app = Flask(__name__)
 

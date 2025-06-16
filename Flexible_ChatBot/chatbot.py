@@ -7,7 +7,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict, Annotated
-
+# Selon le goat on doit pip install tout ça pip install langchain langgraph langchain-core langchain-community langchain-huggingface huggingface-hub faiss-cpu python-dotenv pip install sentence-transformers
 # Importations spécifiques pour la base de vecteurs
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
