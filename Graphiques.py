@@ -12,7 +12,7 @@ import numpy as np
 from Model.Chroniques import Chroniques
 from io import BytesIO
 import base64
-
+from model.py import obtenir_info_prelevement, obtenir_info_ouvrage 
 # -------------- HISTOGRAMME -------------------#
 
 sns.set_theme(style='ticks')
@@ -157,4 +157,36 @@ m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 
 heatmap(chroniques.donnees(), 'volume', m)
 
+
+import folium as f
+
+def map_prelevement(map_obj):
+    """
+    Ajoute les ouvrages sur la carte Folium avec les noms des points de prélèvement associés.
+    """
+    ouvrages = db.obtenir_info_ouvrage()
+    prelevements = db.obtenir_info_prelevement()
+    
+    for _, row in ouvrages.iterrows():
+        lat = row['latitude']
+        lon = row['longitude']
+
+        if pd.notna(lat) and pd.notna(lon):
+            popup_html = f'''
+                <b>{row['nom_ouvrage']}</b><br>
+                Code ouvrage : {row['code_ouvrage']}<br>
+                Département : {row['libelle_departement']}
+            '''
+            popup = f.Popup(popup_html, max_width=150, min_width=50)
+
+            # Taille réduite pour l'icône
+            icon = f.Icon(color='blue', icon='tint', prefix='fa')
+
+            f.Marker(
+                location=(lat, lon),
+                popup=popup,
+                icon=icon
+            ).add_to(map_obj)
+
+m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 m.save("map.html")
