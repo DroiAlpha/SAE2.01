@@ -58,7 +58,7 @@ def render_filtered_template(template, filter_fct, form_keys):
     """
     Fonction générique de transmission des valeurs filtrées d'un tableau
     Je dois mettre les données des 3 tableaux (chroniques, pt_prelevement, ouvrage)
-    DANS la fonction
+    DANS la fonctions
     """
     if request.method == 'POST':
         filters = {key: request.form.get(key) for key in form_keys}
@@ -67,7 +67,7 @@ def render_filtered_template(template, filter_fct, form_keys):
     
     chroniques = Chroniques()
 
-    tab_chroniques = chroniques.filtre()
+    tab_chroniques = chroniques.donnees()
     tab_pt_prelev = db.obtenir_info_prelevement()
     tab_ouvrages = db.obtenir_info_ouvrage()
 

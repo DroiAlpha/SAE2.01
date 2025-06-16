@@ -9,7 +9,7 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from Model.Chroniques import Chroniques
+from Model.Chroniques import *
 from io import BytesIO
 import base64
 
@@ -17,21 +17,41 @@ import base64
 
 sns.set_theme(style='ticks')
 
-def sns_displot(liste: list, titre: str, x_label: str, y_label: str):
-    """
-    C'est l'histogramme
-    Utilisation de base64 et io pour pouvoir mettre l'image
-    dans une page web
-    """
-    data = pd.Series(liste)
-    sns.displot(data)
-    plt.title(titre)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+def histo_grouped(data, labels, categories, x_label, y_label, titre):
+    x = np.arange(len(labels))  # les positions des groupes
+    width = 0.8 / len(data)     # largeur des barres (adaptée selon le nombre de catégories)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    colors = ['cyan', 'deepskyblue', 'steelblue']
+    rects = []
+
+    for i in range(len(data)):
+        rect = ax.bar(x + (i - len(data)/2)*width + width/2, data[i], width, label=categories[i], color=colors[i % len(colors)])
+        rects.append(rect)
+
+    # Ajout des valeurs au-dessus des barres
+    for rect in rects:
+        for r in rect:
+            height = r.get_height()
+            ax.annotate(f'{height}',
+                        xy=(r.get_x() + r.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(titre)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+
     image_stream = BytesIO()
-    plt.savefig(image_stream, format='png')
+    plt.savefig(image_stream, format='png', bbox_inches='tight')
     plt.show()
     plt.close()
+
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
@@ -48,12 +68,6 @@ def sns_pie(data: list, labels: list, titre: str):
     plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-import base64
-from io import BytesIO
-import pandas as pd
 
 def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_label: str, y_label: str, label1="Courbe 1", label2="Courbe 2"):
     df1 = pd.DataFrame({'x': x_values, 'y': data1, 'serie': label1})
@@ -83,7 +97,7 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-def sns_horizontalbarplot(data: list,category, value ):
+def sns_horizontalbarplot(data: list,category, value, x_label, y_label, titre):
     
     df = pd.DataFrame(data)
     
@@ -94,8 +108,9 @@ def sns_horizontalbarplot(data: list,category, value ):
 
     # * Y a que dieu qui sait ce que les trois lignes en dessous font
     ax.legend(ncol=2, loc="lower right", frameon=True, ) # mettre les légendes
-    ax.set(xlim=(0, 24), ylabel="Contribution", xlabel="test") 
+    ax.set(xlim=(0, 2000), ylabel=y_label, xlabel=x_label) 
     sns.despine(left=True, bottom=True) # ! JSP
+    plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
     plt.show()
@@ -104,44 +119,47 @@ def sns_horizontalbarplot(data: list,category, value ):
     return f'data:image/png;base64,{image_base64}'
 
 # ------------------------------------------------------------- #
-# ---------------------- TESTS -------------------------------- #
+# ---------------------- GRAPHIQUES FINAUX ------------------------------ #
 # ------------------------------------------------------------- #
-
-don = [
-    {"cook": "chatgpt", "value": 10},
-    {"cook": "amaurrrr", "value": 15},
-    {"cook": "idriss", "value": 5}
-]
-
-Liste = [uniform(0,1.5) for _ in range(0,10000)]
-data = [30, 20, 50] # Données juste pour try
-labels = ['A', 'B', 'C'] # Nom pour chaque part.
-# sns_horizontalbarplot(don, 'cook' , 'value' )
-# sns_displot(Liste, "Titre", "Abscisse", "Ordonnées") 
-# sns_pie(data, labels, "Titre")
-# sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
 
 chroniques = Chroniques()
 
-# ---- DIAGRAMME CIRCULAIRE ---- #
-data_usages = chroniques.usage2()
-# sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
+def diagramme_circu():
+    data_usages = chroniques.usage2()
+    return sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
 
-# ---- HISTOGRAMME ---- #
+def evo():
+    usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
+    usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+    return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
-usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
-usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+def histo():
+    data_histo = chroniques.compte_dep()
+    titre = "Histogramme du nombre d'ouvrage par département"
+    x_label = "Nombre d'ouvrages"
+    y_label = " "
+    return sns_horizontalbarplot(data_histo, 'dep', 'value', x_label, y_label, titre)
 
-sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
+def histo_horiz():
+    data_histo_2 = []
+    for c in chroniques.usage():
+        data_histo_2.append(milieu(c))
 
-# sns_courbe(usage_1, chroniques.annee(), "Evolution du volume EAU POTABLE", "Annees", "Volumes")
-# sns_courbe(usage_2, chroniques.annee(), "Evolution du volume INDUSTRIE", "Annees", "Volumes")
+    labels = ["SOUT", "CONT"]
+    categories = ["EAU POTABLE", "INDUSTRIE"]
+    titre = "Volumes par usage et par milieu"
+    x_label = "Type de milieu"
+    y_label = "Volume"
+    return histo_grouped(data_histo_2, labels,categories, x_label, y_label, titre)
 
-# for c in chroniques.usage():
-#     data_evo = chroniques.data_evo(c)
-#     sns_courbe(data_evo, chroniques.annee(), "Evolution du volume pour "+c, "Années", "Volume en m^3")
+diagramme_circu() # filtrage pas faisable
+evo()
+histo()
+histo_horiz()
 
-# ----------------- CARTE ---------------------#
+# ---------------------------------------------#
+# ----------------- CARTE ---------------------#    
+# ---------------------------------------------#
 
 chroniques = Chroniques()
 
