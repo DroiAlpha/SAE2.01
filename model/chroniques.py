@@ -1,11 +1,30 @@
+"""
+Modèle de l'application Flask pour interagir avec les données Chroniques de l'API Hub'eau Prélèvements en eau
+"""
+
+#####################################################################
+# IMPORTATION DES MODULES
+#####################################################################
+
 import pandas as pd
 import numpy as np
 
+#####################################################################
+# CLASSE Chroniques
+#####################################################################
+
 class Chroniques:
     def __init__(self):
+        """
+        Initialise la classe Chroniques avec l'URL de l'API Hub'eau Prélèvements en eau
+        """
         self.url = "https://hubeau.eaufrance.fr/api/v1/prelevements/chroniques"
 
     def acces_chroniques(self):
+        """
+        Accède aux données chroniques de l'API Hub'eau Prélèvements en eau
+        :return: Un tableau numpy contenant les données chroniques
+        """
         df = pd.read_json(self.url)
         info = df["data"]
         arr = np.array(info)
@@ -13,10 +32,12 @@ class Chroniques:
     
     def donnees(self):
         """
-        (GROS) Probleme : Ya pas une donnée avec true comme prelevement_ecrasant
+        Renvoie les données de chronique sous forme de liste de dictionnaires
+        :return: Une liste de dictionnaires contenant les données de chronique        
         """
         L = []
-        #c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
+        #? Sélection des données à partir des prelevement_ecrasant impossible : prelevement_ecrasant != true
+        # c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
         for c in self.acces_chroniques():
             if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
                 L.append(c)
@@ -24,6 +45,10 @@ class Chroniques:
 
 
     def colonnes(self):
+        """
+        Renvoie les noms des colonnes de données chroniques
+        :return: Une liste de noms de colonnes
+        """
         L = []
         for i in self.acces_chroniques()[0]:
             L.append(i)
@@ -31,8 +56,11 @@ class Chroniques:
     
     def filtre(self, colonne = None, filtre = None):
         """
-        Renvoie un dataframe avec les données de chronique
-        On peut filtrer avec des colonnes, mais cela marche sans parametres
+        Renvoie un dataframe pandas contenant les données chroniques, filtrées selon la colonne et le filtre spécifiés
+        Si aucun filtre n'est spécifié, renvoie toutes les données
+        :param colonne: Nom de la colonne à filtrer (optionnel)
+        :param filtre: Valeur à filtrer dans la colonne spécifiée (optionnel)
+        :return: Un dataframe pandas contenant les données filtrées
         """
         chroniques = self.donnees()
         L = []
@@ -46,8 +74,9 @@ class Chroniques:
     
     def filtre_ouv(self, nom_ouvrage):
         """
-        Retourne une liste de dictionnaires contenant les volumes et années
-        pour un nom d'ouvrage donné.
+        Retourne une liste de dictionnaires contenant les données chroniques sur les volumes d'eau et années, pour un ouvrage spécifique
+        :param nom_ouvrage: Nom de l'ouvrage à filtrer
+        :return: Une liste de dictionnaires contenant les données chroniques pour l'ouvrage spécifié
         """
         result = []
         for c in self.donnees():
@@ -60,6 +89,12 @@ class Chroniques:
 
     
     def annee(self, colonne, filtre):
+        """
+        Renvoie une liste des années pour lesquelles les données chroniques correspondent à un filtre spécifique sur une colonne donnée
+        :param colonne: Nom de la colonne à filtrer
+        :param filtre: Valeur à filtrer dans la colonne spécifiée
+        :return: Une liste d'années correspondant au filtre appliqué
+        """
         chroniques = self.donnees()
         L = []
         for c in chroniques:
@@ -79,6 +114,11 @@ class Chroniques:
                 return c['nom_ouvrage']
 
     def ouvrage(self, nom_ouvrage):
+        """
+        Renvoie une liste des volumes d'eau pour un ouvrage spécifique
+        :param nom_ouvrage: Nom de l'ouvrage à filtrer
+        :return: Une liste de volumes d'eau pour l'ouvrage spécifié
+        """
         L = []
         for c in self.donnees():
             if c['nom_ouvrage'] == nom_ouvrage:
@@ -86,13 +126,18 @@ class Chroniques:
         return L
 
     def usage(self):
+        """
+        Renvoie une liste des usages uniques présents dans les données chroniques
+        :return: Une liste d'usages uniques
+        """
         e = set()
         for c in self.acces_chroniques():
             e.add(c['libelle_usage'])
         return list(e)
     
-# ------------- TEST ----------------------#
+#####################################################################
+# TESTS
+#####################################################################
 
 chroniques = Chroniques()
-
 print(chroniques.filtre())

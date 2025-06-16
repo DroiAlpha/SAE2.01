@@ -1,4 +1,6 @@
-""" Contrôler de l'application Flask pour le site web sur les prélèvements d'eau """
+"""
+Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
+"""
 
 #####################################################################
 # IMPORTATION DES MODULES

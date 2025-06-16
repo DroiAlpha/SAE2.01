@@ -10,7 +10,7 @@ from folium.plugins import HeatMap, HeatMapWithTime
 from io import BytesIO
 import base64
 from random import *
-from model.chroniques import chroniques
+from model.chroniques import Chroniques
 import model.model as db
 
 # -------------- HISTOGRAMME -------------------#
@@ -115,7 +115,7 @@ labels = ['A', 'B', 'C'] # Nom pour chaque part.
 # sns_pie(data, labels, "Titre")
 # sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
 
-chroniques = chroniques()
+chroniques = Chroniques()
 
 # ---- DIAGRAMME CIRCULAIRE ---- #
 data_usages = chroniques.usage2()
@@ -137,7 +137,7 @@ sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Ann
 
 # ----------------- CARTE ---------------------#
 
-chroniques = chroniques()
+chroniques = Chroniques()
 
 def heatmap(data: np.array, heat: str, map_obj: map):
     """Fonction qui crée une heatmap selon l'argument que l'on souhaite"""

@@ -1,9 +1,14 @@
+"""
+Modèle de l'application Flask pour interagir avec la base de données locale PostgreSQL
+"""
+
 #####################################################################
 # IMPORTATION DES MODULES
 #####################################################################
-# ! Il vous faut installer : pip install sqlalchemy
+
+# ! Installer SQLAlchemy depuis le terminal avec la commande : pip install sqlalchemy
+
 import pandas as pd
-# Ajoute en haut du fichier
 from sqlalchemy import create_engine
 
 #####################################################################
@@ -13,7 +18,16 @@ from sqlalchemy import create_engine
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
 engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.81.64:5432/eaufrance")
 
+#####################################################################
+# FONCTIONS
+#####################################################################
+
 def fct_condition(filtres: dict):
+    """
+    Fonction pour générer les conditions WHERE et les paramètres pour une requête SQL
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'colonne1': valeur1, 'colonne2': valeur2}
+    :return: Tuple contenant la condition WHERE sous forme de chaîne et les paramètres à utiliser dans la requête
+    """
     conditions = []
     params = []
     for cle, valeur in filtres.items():
@@ -22,9 +36,13 @@ def fct_condition(filtres: dict):
             params.append(valeur)
     return " AND ".join(conditions), tuple(params)
 
-
-
 def obtenir_valeurs_distinctes(table, colonne):
+    """
+    Fonction pour obtenir les valeurs distinctes d'une colonne dans une table
+    :param table: Nom de la table dans la base de données
+    :param colonne: Nom de la colonne pour laquelle on veut les valeurs distinctes
+    :return: Liste de dictionnaires contenant les valeurs distinctes
+    """
     requete = f"""
     SELECT DISTINCT
         {colonne}
@@ -34,9 +52,16 @@ def obtenir_valeurs_distinctes(table, colonne):
     resultat = pd.read_sql_query(requete, engine)
     return resultat.to_dict(orient='records')
 
-
 # Fonction générique pour obtenir des données filtrées
 def obtenir_donnees_filtrees(table, colonnes, jointures, filtres) -> pd.DataFrame:
+    """
+    Fonction pour obtenir des données d'une table avec des filtres appliqués
+    :param table: Nom de la table dans la base de données
+    :param colonnes: Liste des colonnes à sélectionner
+    :param jointures: Chaîne de jointures SQL à appliquer
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'colonne1': valeur1, 'colonne2': valeur2}
+    :return: DataFrame contenant les données filtrées
+    """
     condi_where, params = fct_condition(filtres)
     requete = f"""
     SELECT
@@ -53,6 +78,13 @@ def obtenir_donnees_filtrees(table, colonnes, jointures, filtres) -> pd.DataFram
 
 # Fonction générique pour obtenir des données
 def obtenir_donnees(table, colonnes, jointures) -> pd.DataFrame:
+    """
+    Fonction pour obtenir des données d'une table sans filtres
+    :param table: Nom de la table dans la base de données
+    :param colonnes: Liste des colonnes à sélectionner
+    :param jointures: Chaîne de jointures SQL à appliquer
+    :return: DataFrame contenant les données de la table
+    """
     requete = f"""
     SELECT
         {', '.join(colonnes)}
@@ -64,8 +96,17 @@ def obtenir_donnees(table, colonnes, jointures) -> pd.DataFrame:
     info = pd.read_sql_query(requete, engine)
     return info
 
+#####################################################################
+# EXEMPLE D'UTILISATION POUR LES TABLES
+#####################################################################
+
 # Exemple d'utilisation pour la table Ouvrage
 def obtenir_info_ouvrage(filtres=None):
+    """
+    Fonction pour obtenir des informations sur les ouvrages
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'nom_ouvrage': 'AUDELONCOURT'}
+    :return: DataFrame contenant les informations sur les ouvrages
+    """
     table = "ouvrages"
     colonnes = [
         'ouvrages.code_ouvrage', #varchar300 PK
@@ -88,6 +129,11 @@ def obtenir_info_ouvrage(filtres=None):
 
 # Exemple d'utilisation pour la table Point Prelevement
 def obtenir_info_prelevement(filtres=None):
+    """
+    Fonction pour obtenir des informations sur les points de prélèvement
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'nom_point_prelevement': 'ELECTRICITE DE FRANCE'}
+    :return: DataFrame contenant les informations sur les points de prélèvement
+    """
     table = "pt_prelevement"
     colonnes = [
         'pt_prelevement.code_point_prelevement', #varchar300 PK
@@ -109,6 +155,11 @@ def obtenir_info_prelevement(filtres=None):
 
 # Exemple d'utilisation pour la table Commune
 def obtenir_info_commune(filtres=None):
+    """
+    Fonction pour obtenir des informations sur les communes
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'nom_commune': 'Craincourt'}
+    :return: DataFrame contenant les informations sur les communes
+    """
     table = "commune"
     colonnes = [
         'commune.nom_commune', #varchar500
@@ -125,6 +176,11 @@ def obtenir_info_commune(filtres=None):
 
 # Exemple d'utilisation pour la table Departement
 def obtenir_info_departement(filtres=None):
+    """
+    Fonction pour obtenir des informations sur les départements
+    :param filtres: Dictionnaire contenant les filtres à appliquer, par exemple {'code_departement': '12'}
+    :return: DataFrame contenant les informations sur les départements
+    """
     table = "departement"
     colonnes = [
         "departement.code_departement", #PK
@@ -135,6 +191,11 @@ def obtenir_info_departement(filtres=None):
         return obtenir_donnees_filtrees(table, colonnes, jointures, filtres)
     else:
         return obtenir_donnees(table, colonnes, jointures)
+
+#####################################################################
+# TESTS
+#####################################################################
+# Décommenter pour exécuter les tests
 
 # print(obtenir_info_ouvrage())
 # print(obtenir_info_ouvrage({"nom_ouvrage": "AUDELONCOURT"}))
