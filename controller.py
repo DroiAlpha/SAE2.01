@@ -72,7 +72,7 @@ def accueil():
 
 # Route pour la page de la carte des prélèvements en eau "tab_carte.html"
 @app.route('/tableau-bord/carte-prelevements',  methods=['GET', 'POST'])
-def carte():
+def tab_carte():
     """
     Fonction de définition de l'adresse de la page de la carte des prélèvements en eau "tab_carte.html"
     Affiche la carte des prélèvements d'eau avec les ouvrages
@@ -84,7 +84,7 @@ def carte():
 
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
-def graphiques():
+def tab_usages():
     """
     Fonction de définition de l'adresse de la page des graphiques sur les usages de l'eau "tab_usages.html"
     Affiche les graphiques (histogrammes groupés, diagramme en barres empilées et diagramme circulaire) sur les usages de l'eau, avec ou sans filtres
@@ -141,7 +141,7 @@ def graphiques():
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
-def evolution():
+def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
     Affiche un graphique linéaire multiple sur l'évolution des volumes d'eau prélevés pour un ouvrage spécifique

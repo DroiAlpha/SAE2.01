@@ -1,5 +1,13 @@
 # SAE2.01 - README.md
 
+## Informations importantes
+- Fonctions utilisées dans graphiques.py non-définies dans chroniques.py -> Mise en commentaire temporaire des fonctions obsolètes
+- Fonctions en doubles dans graphiques.py -> Mise en commentaire temporaire des fonctions inutiles
+- Fichier de sauvegarde de la carte Folium mis à jour automtiquement à cahque lancement de l'application -> Impossibilité d'ajouter une structure HTML et un style CSS pour formater cette page
+
+# Modifications apportées
+- Uniformisation de la documentation (commentaires et docstring) dans chaque fichier 
+
 ## Comment on va procéder pour la SAE 2.01 ?
   - On utilise une architecture MVC (Modèle-Vue-Contrôleur)
   - On développera en même temps chacune des couches
