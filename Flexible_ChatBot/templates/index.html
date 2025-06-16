@@ -12,8 +12,20 @@
         <h1>Informations sur les prélèvements d'eau</h1>
         <p>Posez vos questions à notre assistant virtuel</p>
     </header>
+<<<<<<< HEAD
     
     <div class="container">
+=======
+    <div class="container">
+        <div class="chat-container">
+            <div id="chat"></div>
+            <div class="input-container">
+                <input type="text" id="userInput" placeholder="Posez votre question ici..." autofocus>
+                <button onclick="sendMessage()">Envoyer</button>
+            </div>
+        </div>
+        
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
         <div class="info-container">
             <section>
                 <h2>Qu'est-ce qu'un prélèvement d'eau ?</h2>
@@ -40,6 +52,7 @@
             </section>
         </div>
     </div>
+<<<<<<< HEAD
     
     <!-- Icône du chatbot -->
     <div class="chatbot-icon" id="chatbotIcon">
@@ -104,10 +117,24 @@
             
             // Ajouter le message de l'utilisateur
             chatbotMessages.innerHTML += `
+=======
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const message = input.value.trim();
+            const chat = document.getElementById("chat");
+            
+            if (!message) return;
+            
+            // Ajout du message de l'utilisateur
+            chat.innerHTML += `
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
                 <div class="message user-message">
                     <i class="fas fa-user user-icon"></i>
                     <div class="message-content">${message}</div>
                 </div>`;
+<<<<<<< HEAD
             
             chatbotInput.value = '';
             
@@ -135,10 +162,45 @@
                     <div class="message error-message">
                         <i class="fas fa-exclamation-triangle"></i>
                         <div class="message-content">Erreur de connexion avec le serveur</div>
+=======
+            input.value = "";
+            
+            // Faire défiler vers le bas
+            chat.scrollTop = chat.scrollHeight;
+            
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await res.json();
+                
+                if (data.response) {
+                    chat.innerHTML += `
+                        <div class="message bot-message">
+                            <i class="fas fa-robot bot-icon"></i>
+                            <div class="message-content">${data.response}</div>
+                        </div>`;
+                } else {
+                    chat.innerHTML += `
+                        <div class="message error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div class="message-content">${data.error || "Réponse vide du serveur"}</div>
+                        </div>`;
+                }
+            } catch (error) {
+                chat.innerHTML += `
+                    <div class="message error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="message-content">Impossible de contacter le serveur</div>
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
                     </div>`;
             }
             
             // Faire défiler vers le bas après la réponse
+<<<<<<< HEAD
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         }
         
@@ -149,6 +211,15 @@
         chatbotInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendChatbotMessage();
+=======
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        // Permettre d'envoyer avec la touche Entrée
+        document.getElementById("userInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
             }
         });
     </script>

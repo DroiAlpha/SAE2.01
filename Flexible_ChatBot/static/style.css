@@ -238,6 +238,7 @@ li {
     .navbar a {
         padding: 8px 15px;
     }
+<<<<<<< HEAD
 }
 /* Chatbot Popup Styles */
 .chatbot-icon {
@@ -377,4 +378,6 @@ li {
         height: 50px;
         font-size: 20px;
     }
+=======
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
 }

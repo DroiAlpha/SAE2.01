@@ -1,5 +1,9 @@
 from flask import Flask, request, jsonify, render_template
+<<<<<<< HEAD
 from chatbot import ask_bot # This import will now work without vectordb
+=======
+from chatbot import ask_bot
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
 
 app = Flask(__name__)
 
@@ -30,4 +34,8 @@ def chat():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    app.run(debug=True)
+>>>>>>> cf7757a3a3ee719b9fc2c02db460156a8315e654
