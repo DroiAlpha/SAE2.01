@@ -258,4 +258,4 @@ def map_prelevement(map_obj):
             ).add_to(map_obj)
 
 m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
-m.save("tab_carte.html")
+m.save("templates/tab_carte.html")
