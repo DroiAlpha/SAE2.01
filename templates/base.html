@@ -11,17 +11,25 @@
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
 <body>
-  <!-- En-tête principal -->
   {% include 'header.html' %}
 
-  <!-- Sub-header (si voulu) -->
   {% if sub_header_template %}
     {% include 'includes/sub_header/' + sub_header_template %}
   {% endif %}
 
-  <!-- Contenu principal de la page -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages"> {# You can style this div in your CSS #}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}"> {# Add category for specific styling (e.g., .success, .error) #}
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   {% block content %}{% endblock %}
-  <!-- Pied de page -->
   {% include 'footer.html' %}
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
