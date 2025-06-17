@@ -1,13 +1,24 @@
 import pandas as pd
 import numpy as np
+import model.model as db
+from model.cache import cache
 
-import Model.model as db
+@cache.cached(key_prefix='donnees_chroniques', timeout=86400)
+def cache_chroniques():
+    """
+    Charge les données des chroniques depuis l'API Hubeau avec mise en cache.
+    """
+    chroniques_instance = Chroniques()
+    data_list = chroniques_instance.donnees()
+    data_df = pd.DataFrame(data_list)
+    return chroniques_instance, data_df
+
 
 class Chroniques:
     def __init__(self):
         self.url = "https://hubeau.eaufrance.fr/api/v1/prelevements/chroniques"
 
-    def acces_chroniques(self):
+    def acces_chroniques(self,):
         df = pd.read_json(self.url)
         info = df["data"]
         arr = np.array(info)
@@ -44,6 +55,23 @@ class Chroniques:
                 L.append(c)
         return L
     
+    def filtre_ulti(self, colonne: list = None, filtre: list = None):
+        """
+        Renvoie une liste avec les données filtrées
+        ATTENTION : les colonnes filtrées doivent etre au meme indice que les filtres
+        (genre, le filtre d'indice 0 doit etre de la colonne d'indice 0, etc)
+        """
+        chroniques = self.donnees()
+        L = []
+        for c in chroniques:
+            if colonne and filtre:
+                for i, j in zip(colonne, filtre):
+                    if c[i] == j:
+                        L.append(c)
+            else:
+                L.append(c)
+        return L
+    
     def filtre_ouv(self, nom_ouvrage):
         """
         Retourne une liste de dictionnaires contenant les volumes et années
@@ -68,16 +96,23 @@ class Chroniques:
                 L.append(c['annee'])
         return L
     
-    def data_evo(self, usage, exp: int): # FILTARGE FAISABLE
-        annees = self.annee()  # c une liste
-        L = []
-        for annee in annees:
-            temp = 0
-            for d in self.filtre():
-                if d['annee'] == annee and d['libelle_usage'] == usage:
-                    temp += d['volume']
-            L.append(temp * exp)
-        return L
+    def data_evo(self, usage, exp: int, colonne: list = None, filtre: list = None): # FILTARGE FAISABLE
+            annees = self.annee()  # c une liste
+            L = []
+            for annee in annees:
+                temp = 0
+                if colonne and filtre:
+                    for d in self.filtre(colonne, filtre):
+                        if d['annee'] == annee and d['libelle_usage'] == usage:
+                            temp += d['volume']
+                    L.append(temp * exp)
+                else:
+                    for d in self.filtre():
+                        if d['annee'] == annee and d['libelle_usage'] == usage:
+                            temp += d['volume']
+                    L.append(temp * exp)
+            return L 
+
 
     def min_annee(self):
         return str(min(self.annee()))
@@ -100,27 +135,39 @@ class Chroniques:
     def usage(self):
         return ['EAU POTABLE', 'INDUSTRIE et ACTIVITES ECONOMIQUES (hors irrigation, hors énergie)']
     
-    def usage2(self): # FILTRAGE FAISABLE
-        L = []
-        for usage in self.usage():
-            i = 0
-            for elt in self.filtre():
-                if elt['libelle_usage'] == usage:
-                    i += 1
-            L.append(i)
-        return L
+    def usage2(self, colonne: list = None, filtre: list = None): # FILTRAGE FAISABLE
+            L = []
+            for usage in self.usage():
+                i = 0
+                if colonne and filtre:
+                    for elt in self.filtre(colonne, filtre):
+                        if elt['libelle_usage'] == usage:
+                            i += 1
+                    L.append(i)
+                else:
+                    for elt in self.filtre():
+                        if elt['libelle_usage'] == usage:
+                            i += 1
+                    L.append(i)
+            return L
     
-    def compte_dep(self): # FILTRAGE FAISABLE
-        dic = {}
-        chroniques = self.filtre()
-        for c in chroniques:
-            if c['code_departement'] not in dic:
-                dic[c['code_departement']] = 1
-            else :
-                dic[c['code_departement']] += 1
-        
-        retour = [{"dep": dep, "value": count} for dep, count in dic.items()]
-        return retour
+    def compte_dep(self, colonne: list = None, filtre: list = None): # FILTRAGE FAISABLE
+            dic = {}
+            if colonne and filtre:
+                for c in self.filtre(colonne, filtre):
+                    if c['code_departement'] not in dic:
+                        dic[c['code_departement']] = 1
+                    else :
+                        dic[c['code_departement']] += 1
+            else:
+                for c in self.filtre():
+                    if c['code_departement'] not in dic:
+                        dic[c['code_departement']] = 1
+                    else :
+                        dic[c['code_departement']] += 1
+
+            retour = [{"dep": dep, "value": count} for dep, count in dic.items()]
+            return retour
     
     def milieux(self):
         ouvrages = db.obtenir_info_ouvrage()
@@ -132,24 +179,32 @@ class Chroniques:
 
 # ------------- TEST ----------------------#
 
-chroniques = Chroniques()
+# chroniques = Chroniques()
 
-ouvrages = db.obtenir_info_ouvrage()
 
-ouvrages_sout = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[0]]['code_ouvrage'].tolist()
-ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1]]['code_ouvrage'].tolist()
 
-donnees = chroniques.donnees()
+# donnees = chroniques.donnees()
 
-def milieu(usage):
+def milieu(usage, colonne: list = None, filtre: list = None):
+    chroniques, data =  cache_chroniques()
+    ouvrages = db.obtenir_info_ouvrage()
+    ouvrages_sout = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[0]]['code_ouvrage'].tolist()
+    ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1]]['code_ouvrage'].tolist()
     volumes_par_ouvrage = {}
-
-    for c in donnees:
-        if 'volume' in c and c.get('libelle_usage') == usage:
-            code = c['code_ouvrage']
-            if code not in volumes_par_ouvrage:
-                volumes_par_ouvrage[code] = []
-            volumes_par_ouvrage[code].append(c['volume'])
+    if colonne and filtre:
+        for c in chroniques.filtre_ulti(colonne, filtre):
+            if 'volume' in c and c.get('libelle_usage') == usage:
+                code = c['code_ouvrage']
+                if code not in volumes_par_ouvrage:
+                    volumes_par_ouvrage[code] = []
+                volumes_par_ouvrage[code].append(c['volume'])
+    else:
+        for c in chroniques.filtre_ulti():
+            if 'volume' in c and c.get('libelle_usage') == usage:
+                code = c['code_ouvrage']
+                if code not in volumes_par_ouvrage:
+                    volumes_par_ouvrage[code] = []
+                volumes_par_ouvrage[code].append(c['volume'])
 
     somme_sout = 0
     for code in ouvrages_sout:

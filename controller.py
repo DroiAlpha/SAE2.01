@@ -17,11 +17,12 @@ from flask import jsonify
 import threading
 from model.cache import cache
 from model.chroniques import cache_chroniques
-from flask_mail import Mail, Message
-import os
 from dotenv import load_dotenv # N'oublie pas d'ajouter cette ligne si tu utilises .env
-import requests
-
+from Flexible_ChatBot.chatbot import ask_bot
+from Flexible_ChatBot.index_data import data_scraping
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "Flexible_ChatBot"))
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -48,9 +49,6 @@ matplotlib.use('Agg')
 
 with app.app_context():
     cache_chroniques()  # Charge les données des chroniques au démarrage de l'application  
-    thread = threading.Thread()
-    thread.start()
-    
 ################################
 # ACCUEIL
 ################################
@@ -62,6 +60,8 @@ def accueil():
     Fonction de définition de l'adresse de la page d'accueil "index.html"
     """
     # Affichage du template
+    thread = threading.Thread(target=data_scraping())
+    thread.start()
     return render_template(
         'index.html', 
         page_title="Accueil"
@@ -379,6 +379,20 @@ def a_propos_equipe():
 @app.route('/contact')
 def contact():
     return render_template('contact.html', page_title="Contact")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_input = data.get("message")
+    if not user_input:
+        return jsonify({"error": "No input"}), 400
+    try:
+        bot_response = ask_bot(user_input)
+        print(f"User: {user_input} -> Bot: {bot_response}")
+        return jsonify({"response": bot_response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 ################################
 # LANCEMENT DE L'APPLICATION
 ################################
