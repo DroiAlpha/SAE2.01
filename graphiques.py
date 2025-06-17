@@ -17,8 +17,8 @@ from folium.plugins import HeatMap, HeatMapWithTime
 from io import BytesIO
 import base64
 from random import *
-from model.chroniques import Chroniques
-import model.model as db
+from Model.chroniques import Chroniques
+import Model.model as db
 
 #####################################################################
 # GRAPHIQUES
@@ -209,53 +209,28 @@ chroniques = Chroniques()
 
 chroniques = Chroniques()
 
-def heatmap(data: np.array, heat: str, map_obj: map):
-    """
-    Fonction pour créer une heatmap à partir des données spécifiées en argument
-    :param data: Données à afficher sur la heatmap
-    :param heat: Nom de la colonne à utiliser pour la heatmap
-    :param map_obj: Objet Folium Map sur lequel ajouter la heatmap
-    :return: None
-    :rtype: None
-    """
-    
-    localisation = [[c['latitude'], c['longitude'], c[heat]] for c in data]
-    HeatMap(localisation, radius=15).add_to(map_obj)
+def heatmap(layer):
+    """Add heatmap data to specified layer"""
+    data = chroniques.donnees()
+    heatmap_data = [[c['latitude'], c['longitude'], c['volume']] for c in data]
+    HeatMap(heatmap_data, radius=15).add_to(layer)
 
-m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
-
-heatmap(chroniques.donnees(), 'volume', m)
-
-def map_prelevement(map_obj):
-    """
-    Fonction pour ajouter les ouvrages des points de prélèvement sur la carte Folium
-    :param map_obj: Objet Folium Map sur lequel ajouter les points de prélèvement
-    :return: None
-    :rtype: None
-    """
+def map_prelevement(layer):
+    """Add prelevement markers to specified layer"""
     ouvrages = db.obtenir_info_ouvrage()
-    prelevements = db.obtenir_info_prelevement()
     
     for _, row in ouvrages.iterrows():
-        lat = row['latitude']
-        lon = row['longitude']
-
-        if pd.notna(lat) and pd.notna(lon):
-            popup_html = f'''
+        if pd.notna(row['latitude']) and pd.notna(row['longitude']):
+            popup_html = f"""
                 <b>{row['nom_ouvrage']}</b><br>
-                Code ouvrage : {row['code_ouvrage']}<br>
-                Département : {row['libelle_departement']}
-            '''
-            popup = f.Popup(popup_html, max_width=150, min_width=50)
-
-            # Taille réduite pour l'icône
-            icon = f.Icon(color='blue', icon='tint', prefix='fa')
-
+                Code: {row['code_ouvrage']}<br>
+                Département: {row['libelle_departement']}
+            """
             f.Marker(
-                location=(lat, lon),
-                popup=popup,
-                icon=icon
-            ).add_to(map_obj)
+                location=(row['latitude'], row['longitude']),
+                popup=f.Popup(popup_html, max_width=150),
+                icon=f.Icon(color='blue', icon='tint', prefix='fa')
+            ).add_to(layer)
 
 m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
 m.save("templates/tab_carte.html")

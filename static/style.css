@@ -24,16 +24,16 @@ body {
 /********************************************/
 
 header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     padding: 0 2rem;
     height: 70px;
     background: linear-gradient(90deg, #2ec4e6 0%, #1a8bb8 100%);
-    /* background: linear-gradient(to right, #B0E0E6, #40E0D0); */
 }
 
 .logo {
+    justify-self: start;
     display: flex;
     align-items: center;
 }
@@ -51,7 +51,7 @@ header {
 }
 
 h1 {
-    flex: 1;
+    grid-column: 2;
     text-align: center;
     font-size: 2rem;
     color: #fff;
@@ -59,6 +59,7 @@ h1 {
 }
 
 .menu {
+    justify-self: end;
     display: flex;
     align-items: center;
     position: relative;
@@ -76,12 +77,13 @@ h1 {
 .menu-items {
     display: none;
     position: absolute;
-    top: 70px;
-    right: 2rem;
+    top: 42.5px;
+    right: 0rem; /* Ajuster la position du menu A NE ABSOLUMENT PAS CHANGER */
     background: #2196f3;
     color: #fff;
     border-radius: 0 0 1rem 1rem;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    background: linear-gradient(90deg, #2ec4e6 0%, #1a8bb8 100%);
     min-width: 200px;
     z-index: 1000;
     padding: 1rem 0;}
@@ -92,9 +94,13 @@ h1 {
   background-color: #1a8bb8;
 }
 
+.menu-items li {
+    list-style: none;
+}
+
 .menu-items a {
     display: block;
-    padding: 0.75rem 2rem;
+    padding: 0.5rem 2rem;
     color: #fff;
     text-decoration: none;
     transition: background 0.2s;
@@ -125,37 +131,55 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background-image: url("../static/bkgd.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     width: 100%;
+    padding-top: 2rem;
 }
 
 .home-logo {
-    grid-column: span 4 / span 4;
-    grid-row: span 2 / span 2;
-    grid-column-start: 3;
-    grid-row-start: 4;
+    display: flex;
+    align-items: center; 
+    margin-bottom: 2rem; 
 }
 
 .img-home-logo {
-    width: 10%;
+    width: 100px; 
     height: auto;
 }
 
+.txt-logo {
+    font-size: 3rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+    color: #fff;
+}
+
 .welcome-h2 {
-    grid-column: span 6 / span 6;
-    grid-row: span 2 / span 2;
-    grid-column-start: 2;
-    grid-row-start: 7;
+    text-align: center;
+    max-width: 600px; 
+    margin: 0 auto 2rem; 
+    padding: 0 1rem; 
+    color: #fff;
 }
 
 .btn-dashboard {
-    grid-column: span 2 / span 2;
-    grid-column-start: 4;
-    grid-row-start: 10;
+    display: inline-block;
+    padding: 1.5rem 2rem;
+    background: #2196f3;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 1rem;
+    font-weight: 500;
+    transition: background 0.3s;
+    font-size: 1.3rem;
+}
+
+.btn-dashboard:hover {
+    background: #1976d2;
 }
 
 /********************************************/
@@ -170,6 +194,56 @@ h1 {
 .filter-arrow.rotated {
     transform: rotate(180deg);
 }
+
+/********************************************/
+/* Carte */
+/********************************************/
+.map-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative; 
+}
+
+#map {
+    flex: 1;
+    width: 100%;
+    z-index: 0; 
+    background: #f8f9fa;
+}
+
+.leaflet-heatmap-layer {
+  opacity: 0.8 !important;
+}
+
+.map-controls {
+    position: absolute;
+    top: 500px;
+    right: 15px;
+    z-index: 1;
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.map-controls button {
+    padding: 6px 12px;
+    margin: 0 2px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.map-controls button.active {
+    background: #2196F3;
+    color: white;
+    border-color: #1976D2;
+}
+
 
 /********************************************/
 /* Jeux de données */
@@ -189,4 +263,5 @@ footer {
     grid-column: span 8 / span 8;
     grid-row-start: 12;
     background: linear-gradient(to right, #B0E0E6, #40E0D0);
+    text-align: center;
 }

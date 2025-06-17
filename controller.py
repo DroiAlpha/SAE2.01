@@ -12,9 +12,11 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import *
-import model.model as db
-from model.chroniques import *
+from graphiques import map_prelevement, heatmap, sns_horizontalbarplot, sns_pie, sns_courbe
+import Model.model as db
+from Model.chroniques import *
+import folium
+from flask import jsonify
 
 #####################################################################
 # CONFIGURATION
@@ -71,18 +73,54 @@ def accueil():
 ################################
 
 # Route pour la page de la carte des prélèvements en eau "tab_carte.html"
-@app.route('/tableau-bord/carte-prelevements',  methods=['GET', 'POST'])
+
+@app.route('/tableau-bord/carte-prelevements')
 def tab_carte():
-    """
-    Fonction de définition de l'adresse de la page de la carte des prélèvements en eau "tab_carte.html"
-    Affiche la carte des prélèvements d'eau avec les ouvrages
-    """
+    """Renvoie la map avec les deux layers : les prélèvements et la heatmap"""
     return render_template(
-        'tab_carte.html', 
-        page_title="Tableau de bord", 
+        'carte.html',
+        page_title="Tableau de bord",
         page_sub_title="Carte des prélèvements"
     )
 
+@app.route('/api/map-data')
+@cache.cached(timeout=300)
+def get_map_data():
+    """Api pour récupérer les données de la carte des prélèvements"""
+    ouvrages = db.obtenir_info_ouvrage()
+    heatmap_data = chroniques.donnees()
+    
+    prelevements = []
+    for _, row in ouvrages.iterrows():
+        try:
+            lat = float(row['latitude'])
+            lng = float(row['longitude'])
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                prelevements.append({
+                    'lat': lat,
+                    'lng': lng,
+                    'name': str(row['nom_ouvrage'])[:50],
+                    'code': str(row['code_ouvrage'])
+                })
+        except (ValueError, TypeError):
+            continue
+    
+    heatmap_points = []
+    for d in heatmap_data:
+        try:
+            lat = float(d['latitude'])
+            lng = float(d['longitude'])
+            vol = float(d.get('volume', 1))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                heatmap_points.append([lat, lng, vol])
+        except (ValueError, TypeError):
+            continue
+    
+    return jsonify({
+        'prelevements': prelevements,
+        'heatmap': heatmap_points
+    })
+    
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
 def tab_usages():
