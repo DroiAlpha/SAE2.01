@@ -1,4 +1,4 @@
-from Flexible_ChatBot.scraper import scrape_site
+from scraper import scrape_site
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
@@ -28,3 +28,5 @@ def data_scraping():
     db.save_local("vectordb")
 
     print("Base vectorielle créée avec", len(docs_split), "documents.")
+
+data_scraping()

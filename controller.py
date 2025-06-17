@@ -8,21 +8,16 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 
 # ! Installer Flask-Caching depuis le terminal avec la commande : pip install flask-caching redis
 
-from flask import Flask, render_template, request,redirect, url_for, flash
+from flask import Flask, render_template, request
 import matplotlib
 from graphiques import sns_horizontalbarplot, sns_pie, histo_horiz, evo
 import model.model as db
 from model.chroniques import *
 from flask import jsonify
-import threading
 from model.cache import cache
 from model.chroniques import cache_chroniques
 from dotenv import load_dotenv # N'oublie pas d'ajouter cette ligne si tu utilises .env
 from Flexible_ChatBot.chatbot import ask_bot
-from Flexible_ChatBot.index_data import data_scraping
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "Flexible_ChatBot"))
 #####################################################################
 # CONFIGURATION
 #####################################################################
@@ -33,7 +28,7 @@ load_dotenv() # Appelle cette fonction au début de ton fichier si tu utilises .
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '10.10.3.132'
+app.config['CACHE_REDIS_HOST'] = '192.168.1.24'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
@@ -55,13 +50,12 @@ with app.app_context():
 
 # Route pour la page d'accueil "index.html"
 @app.route("/")
+@cache.cached(timeout=3600)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
     """
     # Affichage du template
-    thread = threading.Thread(target=data_scraping())
-    thread.start()
     return render_template(
         'index.html', 
         page_title="Accueil"
@@ -398,4 +392,4 @@ def chat():
 ################################
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=777) # Port chanceux la team
