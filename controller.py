@@ -364,7 +364,8 @@ def a_propos_manuel():
     return render_template(
         'a_propos_manuel.html', 
         page_title="À propos",
-        page_sub_title="Manuel d'utilisation"
+        page_sub_title="Manuel d'utilisation",
+        sub_header_template="about.html"
     )
 
 # Route pour la page d'à propos sur l'équipe projet "a_propos_equipe.html"
@@ -378,7 +379,8 @@ def a_propos_equipe():
     return render_template(
         'a_propos_equipe.html', 
         page_title="À propos", 
-        page_sub_title="Notre équipe projet"
+        page_sub_title="Notre équipe projet",
+        sub_header_template="about.html"
     )
 
 ################################
