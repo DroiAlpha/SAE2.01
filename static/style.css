@@ -867,3 +867,18 @@ footer {
     padding: 2rem 5%;
   }
 }
+
+/* Téléchargements */
+.download-form {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.btn-primary.btn-sm {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.download-form button i {
+    margin-right: 5px;
+}

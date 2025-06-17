@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-    <!-- barre de Filtre  -->
+    <!-- barre de Filtre -->
     <div class="filter-sidebar">
         <div class="filter-card">
             <div class="filter-header">
                 <h3>Filtres</h3>
             </div>
             <div class="filter-body">
-                <form method="POST" action="{{ url_for('tab_usages') }}">
+                <form method="POST" action="{{ url_for('tab_usages') }}" id="filter-form">
                     <!-- Filtre année -->
                     <div class="filter-group">
                         <label for="annee">Année</label>
@@ -78,6 +78,16 @@
         <div class="graph-card">
             <div class="graph-header">
                 Répartition des usages
+                {% if diagramme_circulaire %}
+                <form method="post" action="{{ url_for('download_diagramme_circulaire') }}" class="download-form">
+                    {% for key, value in filters.items() %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-download"></i> PNG
+                    </button>
+                </form>
+                {% endif %}
             </div>
             <div class="graph-container">
                 {% if diagramme_circulaire %}
@@ -94,6 +104,16 @@
         <div class="graph-card">
             <div class="graph-header">
                 Ouvrages par département
+                {% if histogrammehorizon %}
+                <form method="post" action="{{ url_for('download_histogramme_horizontal') }}" class="download-form">
+                    {% for key, value in filters.items() %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-download"></i> PNG
+                    </button>
+                </form>
+                {% endif %}
             </div>
             <div class="graph-container">
                 {% if histogrammehorizon %}
@@ -110,6 +130,7 @@
         <div class="graph-card">
             <div class="graph-header">
                 Volume d'eau par usage et milieu
+                <!-- Pas de téléchargement pour ce graphique car 'histo_horiz' n'est pas défini -->
             </div>
             <div class="graph-container">
                 {% if volumes_usage_milieu %}

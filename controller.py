@@ -8,15 +8,23 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 
 # ! Installer Flask-Caching depuis le terminal avec la commande : pip install flask-caching redis
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import matplotlib
+from matplotlib.figure import Figure
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz
 import model.model as db
 from model.chroniques import *
 import folium
 from flask import jsonify
+from io import BytesIO
+import pandas as pd
+import base64
+
+# Ajout des bibliothèques io et pandas et de la fonction send_file de flask
+# Ajout des bibliothèques matplotlib.figure et base64
+# ajout de la fonction histo_horiz de graphiques.py
 
 #####################################################################
 # CONFIGURATION
@@ -351,6 +359,160 @@ def a_propos_equipe():
         page_title="À propos", 
         page_sub_title="Notre équipe projet"
     )
+
+################
+# Téléchargements#
+################
+
+# Route pour télécharger le tableau des chroniques
+@app.route('/download_chroniques', methods=['GET', 'POST'])
+def download_chroniques():
+    chroniques = Chroniques()
+    data = chroniques.donnees()
+    df = pd.DataFrame(data)
+
+    # Appliquer les filtres si POST
+    if request.method == 'POST':
+        filters = {
+            "annee": request.form.get("annee"),
+            "libelle_usage": request.form.get("libelle_usage"),
+            "nom_commune": request.form.get("nom_commune"),
+            "libelle_departement": request.form.get("libelle_departement"),
+            "nom_ouvrage": request.form.get("nom_ouvrage")
+        }
+        for key, value in filters.items():
+            if value:
+                if key == "annee":
+                    df = df[df[key] == int(value)]
+                else:
+                    df = df[df[key] == value]
+
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return send_file(
+        output,
+        download_name='chroniques.csv',
+        as_attachment=True,
+        mimetype='text/csv'
+    )
+
+# Route pour télécharger le tableau des points de prélèvement
+@app.route('/download_points_prelevement')
+def download_points_prelevement():
+    df = db.obtenir_info_prelevement()
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return send_file(
+        output,
+        download_name='points_prelevement.csv',
+        as_attachment=True,
+        mimetype='text/csv'
+    )
+
+# Route pour télécharger le tableau des ouvrages
+@app.route('/download_ouvrages')
+def download_ouvrages():
+    df = db.obtenir_info_ouvrage()
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return send_file(
+        output,
+        download_name='ouvrages.csv',
+        as_attachment=True,
+        mimetype='text/csv'
+    )
+
+# Route pour télécharger le diagramme circulaire (tab_usages)
+@app.route('/download_diagramme_circulaire', methods=['POST'])
+def download_diagramme_circulaire():
+    chroniques = Chroniques()
+    data = pd.DataFrame(chroniques.donnees())
+    filters = {
+        "annee": request.form.get("annee"),
+        "libelle_usage": request.form.get("libelle_usage"),
+        "nom_commune": request.form.get("nom_commune"),
+        "libelle_departement": request.form.get("libelle_departement"),
+        "nom_ouvrage": request.form.get("nom_ouvrage")
+    }
+    filtered_data = data.copy()
+    for key, value in filters.items():
+        if value:
+            if key == "annee":
+                filtered_data = filtered_data[filtered_data[key] == int(value)]
+            else:
+                filtered_data = filtered_data[filtered_data[key] == value]
+
+    if not filtered_data.empty:
+        usage_counts = filtered_data['libelle_usage'].value_counts()
+        fig_data = sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")
+        fig = Figure()
+        fig_data = base64.b64decode(fig_data.split(',')[1])
+        output = BytesIO(fig_data)
+        return send_file(
+            output,
+            download_name='diagramme_circulaire.png',
+            as_attachment=True,
+            mimetype='image/png'
+        )
+    return "Aucune donnée disponible", 400
+
+# Route pour télécharger l'histogramme horizontal (tab_usages)
+@app.route('/download_histogramme_horizontal', methods=['POST'])
+def download_histogramme_horizontal():
+    chroniques = Chroniques()
+    data = pd.DataFrame(chroniques.donnees())
+    filters = {
+        "annee": request.form.get("annee"),
+        "libelle_usage": request.form.get("libelle_usage"),
+        "nom_commune": request.form.get("nom_commune"),
+        "libelle_departement": request.form.get("libelle_departement"),
+        "nom_ouvrage": request.form.get("nom_ouvrage")
+    }
+    filtered_data = data.copy()
+    for key, value in filters.items():
+        if value:
+            if key == "annee":
+                filtered_data = filtered_data[filtered_data[key] == int(value)]
+            else:
+                filtered_data = filtered_data[filtered_data[key] == value]
+
+    if not filtered_data.empty:
+        hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
+        hist_data.columns = ['dep', 'value']
+        fig_data = sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d'ouvrages", "Départements", "Nombre d'ouvrages par département")
+        fig = Figure()
+        fig_data = base64.b64decode(fig_data.split(',')[1])
+        output = BytesIO(fig_data)
+        return send_file(
+            output,
+            download_name='histogramme_horizontal.png',
+            as_attachment=True,
+            mimetype='image/png'
+        )
+    return "Aucune donnée disponible", 400
+
+# Route pour télécharger le graphique d'évolution temporelle (tab_evolution)
+@app.route('/download_evolution', methods=['POST'])
+def download_evolution():
+    nom_ouvrage = request.form.get("nom_ouvrage", "AUDELONCOURT")
+    chroniques = Chroniques()
+    donnees = chroniques.filtre_ouv(nom_ouvrage)
+    if donnees:
+        df = pd.DataFrame(donnees).sort_values(by='annee')
+        fig_data = sns_courbe(df)
+        fig = Figure()
+        fig_data = base64.b64decode(fig_data.split(',')[1])
+        output = BytesIO(fig_data)
+        return send_file(
+            output,
+            download_name='evolution_temporelle.png',
+            as_attachment=True,
+            mimetype='image/png'
+        )
+    return "Aucune donnée disponible", 400
 
 ################################
 # LANCEMENT DE L'APPLICATION

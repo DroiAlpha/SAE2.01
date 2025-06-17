@@ -9,10 +9,10 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from Model.chroniques import *
+from model.chroniques import *
 from io import BytesIO
 import base64
-from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
+from model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
 
 # -------------- HISTOGRAMME -------------------#
 

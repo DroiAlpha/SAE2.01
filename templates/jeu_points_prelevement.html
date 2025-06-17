@@ -16,6 +16,13 @@
 } %}
 {% include 'jeux_filter_bar.html' %}
 
+<!-- Bouton de téléchargement -->
+{% if tab_pt_prelev %}
+<a href="{{ url_for('download_points_prelevement') }}" class="btn btn-primary">
+    <i class="fas fa-download"></i> Télécharger en CSV
+</a>
+{% endif %}
+
 <!-- Jeu de données Points de prélèvements -->
 {% if tab_pt_prelev %}
 <table>

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<<<<<<< HEAD
+<!-- En-tête secondaire -->
+{% include 'tab_sub-header.html' %}
 
 <div class="dashboard-container">
     <!-- Filtres -->
@@ -11,48 +12,16 @@
                 <h5>Filtres</h5>
             </div>
             <div class="card-body">
-                <form method="POST">
-                    <!-- Filtre Année -->
+                <form method="POST" action="{{ url_for('tab_evolution') }}">
                     <div class="mb-3">
-                        <label class="form-label">Année</label>
-                        <select name="annee" class="form-select">
-                            <option value="">Toutes</option>
-                            {% for year in available_years %}
-                            <option value="{{ year }}" {% if filters.annee == year|string %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Comparaison Usages -->
-                    <div class="mb-3">
-                        <label class="form-label">Usage 1</label>
-                        <select name="usage_1" class="form-select">
-                            {% for usage in available_usages %}
-                            <option value="{{ usage }}" {% if filters.usage_1 == usage %}selected{% endif %}>{{ usage }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Usage 2</label>
-                        <select name="usage_2" class="form-select">
-                            {% for usage in available_usages %}
-                            <option value="{{ usage }}" {% if filters.usage_2 == usage %}selected{% endif %}>{{ usage }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Autres filtres -->
-                    <div class="mb-3">
-                        <label class="form-label">Département</label>
-                        <select name="libelle_departement" class="form-select">
+                        <label class="form-label">Ouvrage</label>
+                        <select name="nom_ouvrage" class="form-select">
                             <option value="">Tous</option>
-                            {% for dept in available_departements %}
-                            <option value="{{ dept }}" {% if filters.libelle_departement == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% for ouvrage in available_ouvrages %}
+                            <option value="{{ ouvrage }}" {% if nom_ouvrage == ouvrage %}selected{% endif %}>{{ ouvrage }}</option>
                             {% endfor %}
                         </select>
                     </div>
-
                     <button type="submit" class="btn btn-primary w-100">Appliquer</button>
                 </form>
             </div>
@@ -63,27 +32,27 @@
     <div class="graph-content">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-primary text-white">
-                <h5>Évolution Temporelle</h5>
+                <h5>Évolution Temporelle
+                    {% if graphique %}
+                    <form method="post" action="{{ url_for('download_evolution') }}" class="download-form">
+                        <input type="hidden" name="nom_ouvrage" value="{{ nom_ouvrage }}">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-download"></i> PNG
+                        </button>
+                    </form>
+                    {% endif %}
+                </h5>
             </div>
             <div class="card-body">
-                {% if evolution_graph %}
-                <img src="{{ evolution_graph }}" class="img-fluid" alt="Évolution des usages">
+                {% if graphique %}
+                <img src="{{ graphique }}" class="img-fluid" alt="Évolution temporelle">
                 {% else %}
                 <div class="alert alert-info">
-                    Sélectionnez des usages à comparer
+                    Sélectionnez un ouvrage
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-=======
-<!-- En-tête secondaire -->
-{% include 'tab_sub-header.html' %}
-
-
-
-<!-- Barre de filtres -->
-{% import 'tab_filter-bar.html' %}
 {% endblock %}
->>>>>>> vue
