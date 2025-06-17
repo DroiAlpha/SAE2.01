@@ -9,7 +9,7 @@ def scrape_site(urls):
             response = requests.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
             text = soup.get_text(separator="\n")
-            print(f"--- Contenu scrappé depuis {url} ---\n{text[:500]}\n")
+            print(f"--- Contenu scrappé depuis {url} ---\n{text[:-1]}\n")
             all_text += text + "\n\n"
         except Exception as e:
             print(f"Erreur lors du scraping de {url} : {e}")

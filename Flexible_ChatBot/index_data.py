@@ -14,7 +14,8 @@ def data_scraping():
         "http://127.0.0.1:1000/jeux-donnees/ouvrages",
         "http://127.0.0.1:1000/a-propos/manuel-utilisation",
         "http://127.0.0.1:1000/a-propos/notre-equipe-projet",
-        "http://127.0.0.1:1000/contact"
+        "http://127.0.0.1:1000/contact",
+        "http://127.0.0.1:1000/8743b52063cd84097a65d1633f5c74f5"
     ]
 
     text = scrape_site(urls)

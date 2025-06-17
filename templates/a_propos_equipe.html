@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="team-page">
+<div class="clean-team-page">
   <div class="team-header">
     <h1>Notre équipe</h1>
-    <div class="team-nav">
-      <a href="{{ url_for('a_propos_manuel') }}" class="team-nav-link">Manuel d'utilisation</a>
-      <span class="nav-separator">|</span>
-      <a href="{{ url_for('a_propos_equipe') }}" class="team-nav-link active">Notre équipe projet</a>
+    <div class="team-switch">
+      <a href="{{ url_for('a_propos_manuel') }}" class="switch-link">
+        <i class="material-icons">menu_book</i>
+        Voir le manuel
+      </a>
     </div>
   </div>
 
@@ -21,10 +22,6 @@
       <p class="member-quote">"{{ member.quote }}"</p>
     </div>
     {% endfor %}
-  </div>
-
-  <div class="team-footer">
-    <p>BUT Informatique 1 - Groupe F11B - Équipe B1 - Juin 2025</p>
   </div>
 </div>
 {% endblock %}
