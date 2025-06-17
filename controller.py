@@ -7,7 +7,7 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 #####################################################################
 
 # ! Installer Flask-Caching depuis le terminal avec la commande : pip install flask-caching redis
-
+from math import ceil
 from flask import Flask, render_template, request
 import matplotlib
 from graphiques import sns_horizontalbarplot, sns_pie, histo_horiz, evo
@@ -117,7 +117,7 @@ def get_map_data():
     })
     
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
-@app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'],)
+@app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
 def tab_usages():
     chroniques, data = cache_chroniques()
     data = pd.DataFrame(data)
@@ -239,25 +239,24 @@ def tab_evolution():
 ################################
 
 # Route pour la page du jeu de données pour les chroniques "jeu_chroniques.html"
-@app.route('/jeux-donnees/chroniques')
+@app.route('/jeux-donnees/chroniques', methods=['GET', 'POST'])
 def jeu_chroniques():
     """
     Route pour la page du jeu de données pour les chroniques "jeu_chroniques.html"
     Affiche les données chroniques d'eau prélevée dans un tableau, avec des filtres pour affiner la recherche
     """
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    chroniques, data = cache_chroniques()
     return render_filtered_template(
         'jeu_chroniques.html',
-        chroniques().filtre,
-        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"],
         data_type="chroniques",
-        page_title="Jeux de données", 
-        page_sub_title="Chroniques"
+        page_title="Jeux de données",
+        page_sub_title="Chroniques",
+        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"],
+        sub_header_template="jeux_sub-header.html"
     )
 
 # Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
-@app.route('/jeux-donnees/points-prelevement')
+@app.route('/jeux-donnees/points-prelevement', methods=['GET', 'POST'])
 def jeu_points_prelevement():
     """
     Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
@@ -266,15 +265,15 @@ def jeu_points_prelevement():
     # Fonction générique de transmission des valeurs filtrées d'un tableau
     return render_filtered_template(
         'jeu_points_prelevement.html',
-        None,
-        form_keys=["code_point", "nom_point", "nom_commune", "libelle_departement"],
-        data_type="points_prelevement", 
-        page_title="Jeux de données", 
-        page_sub_title="Points de prélèvement"
+        data_type="points_prelevement",
+        page_title="Jeux de données",
+        page_sub_title="Points de prélèvement",
+        form_keys=["code_point_prelevement", "nom_point_prelevement", "nom_commune", "libelle_departement"],
+        sub_header_template="jeux_sub-header.html"
     )
 
 # Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html"
-@app.route('/jeux-donnees/ouvrages')
+@app.route('/jeux-donnees/ouvrages', methods=['GET', 'POST'])
 def jeu_ouvrages():
     """
     Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html
@@ -283,57 +282,81 @@ def jeu_ouvrages():
     # Fonction générique de transmission des valeurs filtrées d'un tableau
     return render_filtered_template(
         'jeu_ouvrages.html',
-        None,
+        data_type="ouvrages",
+        page_title="Jeux de données",
+        page_sub_title="Ouvrages",
         form_keys=["code_ouvrage", "nom_ouvrage", "nom_commune", "libelle_departement"],
-        data_type="ouvrages", 
-        page_title="Jeux de données", 
-        page_sub_title="Ouvrages"
+        sub_header_template="jeux_sub-header.html"
     )
 
-def render_filtered_template(template, filter_fct, form_keys, data_type="chroniques"):
+def render_filtered_template(template, data_type, page_title, page_sub_title, form_keys, sub_header_template=None):
     """
-    Fonction générique de transmission des valeurs filtrées d'un tableau
+    Fonction générique de transmission des valeurs filtrées d'un tableau avec pagination.
     """
-    chroniques, data = cache_chroniques()
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
     # Récupération des données selon le type
+    data = []
     if data_type == "chroniques":
-        data = chroniques.donnees()
+        chroniques_instance, _ = cache_chroniques()
+        data = chroniques_instance.donnees()
     elif data_type == "points_prelevement":
-        data = db.obtenir_info_prelevement()
+        data = db.obtenir_info_prelevement().to_dict(orient="records") #  on veut être sur que c'est des dictionnaires
     elif data_type == "ouvrages":
-        data = db.obtenir_info_ouvrage().to_dict(orient="records")
-    else:
-        data = []
+        data = db.obtenir_info_ouvrage().to_dict(orient="records") # pareil
 
     # Préparation des options pour les filtres (valeurs uniques)
     filter_options = {
-        key: sorted({str(row.get(key, "")) for row in data if row.get(key, "")})
+        key: sorted(list(set(str(row.get(key, "")) for row in data if row.get(key) is not None and str(row.get(key)).strip() != '')))
         for key in form_keys
     }
 
-    # Application des filtres si POST
+    # Application des filtres
     filtered_values = data
+    filters = {}
     if request.method == 'POST':
         filters = {key: request.form.get(key) for key in form_keys}
-        for key, value in filters.items():
-            if value:
-                filtered_values = [row for row in filtered_values if str(row.get(key, "")) == value]
-    else:
-        filters = {}
+    else: # Si c'est une requête GET, on prend les filtres de la requête
+        filters = {key: request.args.get(key) for key in form_keys}
+
+    for key, value in filters.items():
+        if value and value != 'None': # On ignore les valeurs vides ou 'None'
+            filtered_values = [row for row in filtered_values if str(row.get(key, "")) == value]
+
+    total_items = len(filtered_values)
+    total_pages = ceil(total_items / per_page)
+    
+    start_index = (page - 1) * per_page
+    end_index = start_index + per_page
+    paginated_values = filtered_values[start_index:end_index]
+
+    filter_labels = {
+        'annee': 'Année',
+        'libelle_usage': 'Usage',
+        'nom_commune': 'Commune',
+        'libelle_departement': 'Département',
+        'nom_ouvrage': 'Ouvrage',
+        'code_point_prelevement': 'Code Point',
+        'nom_point_prelevement': 'Nom Point',
+        'code_ouvrage': 'Code Ouvrage'
+    }
+
 
     return render_template(
         template,
         filter_fields=form_keys,
-        filter_labels={  # à adapter selon vos besoins
-            'annee': 'Année',
-            'libelle_usage': 'Usage',
-            'nom_commune': 'Commune',
-            'libelle_departement': 'Département',
-            'nom_ouvrage': 'Ouvrage'
-        },
+        filter_labels=filter_labels,
         filter_options=filter_options,
-        filtered_values=filtered_values,
-        **filters
+        data=paginated_values, 
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        total_items=total_items,
+        current_filters=filters,
+        page_title=page_title,
+        page_sub_title=page_sub_title,
+        sub_header_template="jeux_sub-header.html"
     )
 
 ################################
@@ -392,4 +415,4 @@ def chat():
 ################################
 
 if __name__ == '__main__':
-    app.run(debug=False, port=1000) # Port chanceux la team
+    app.run(debug=False, port=304) # Port chanceux la team
