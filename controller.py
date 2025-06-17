@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -230,14 +230,12 @@ def jeu_chroniques():
     Route pour la page du jeu de données pour les chroniques "jeu_chroniques.html"
     Affiche les données chroniques d'eau prélevée dans un tableau, avec des filtres pour affiner la recherche
     """
-    render_filtered_template(
+    # Fonction générique de transmission des valeurs filtrées d'un tableau
+    return render_filtered_template(
         'jeu_chroniques.html',
         Chroniques().filtre,
-        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
-    )
-    # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template(
-        'jeu_chroniques.html', 
+        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"],
+        data_type="chroniques",
         page_title="Jeux de données", 
         page_sub_title="Chroniques"
     )
@@ -249,14 +247,12 @@ def jeu_points_prelevement():
     Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
     Affiche les points de prélèvement d'eau dans un tableau, avec des filtres pour affiner la recherche
     """
-    render_filtered_template(
-        'jeu_points_prelevement.html',
-        Chroniques().filtre,
-        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
-    )
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template(
-        'jeu_points_prelevement.html', 
+    return render_filtered_template(
+        'jeu_points_prelevement.html',
+        None,
+        form_keys=["code_point", "nom_point", "nom_commune", "libelle_departement"],
+        data_type="points_prelevement", 
         page_title="Jeux de données", 
         page_sub_title="Points de prélèvement"
     )
@@ -268,39 +264,60 @@ def jeu_ouvrages():
     Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html
     Affiche les ouvrages d'eau dans un tableau, avec des filtres pour affiner la recherche
     """
-    render_filtered_template(
-        'jeu_ouvrages.html',
-        Chroniques().filtre,
-        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
-    )
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template(
-        'jeu_ouvrages.html', 
+    return render_filtered_template(
+        'jeu_ouvrages.html',
+        None,
+        form_keys=["code_ouvrage", "nom_ouvrage", "nom_commune", "libelle_departement"],
+        data_type="ouvrages", 
         page_title="Jeux de données", 
         page_sub_title="Ouvrages"
     )
 
-def render_filtered_template(template, filter_fct, form_keys):
+def render_filtered_template(template, filter_fct, form_keys, data_type="chroniques"):
     """
     Fonction générique de transmission des valeurs filtrées d'un tableau
     """
-    #! Il faut encore mettre les données des 3 tableaux (chroniques, pt_prelevement, ouvrages) DANS la fonction
+    chroniques = Chroniques()
+    # Récupération des données selon le type
+    if data_type == "chroniques":
+        data = chroniques.donnees()
+    elif data_type == "points_prelevement":
+        data = db.obtenir_info_prelevement()
+    elif data_type == "ouvrages":
+        data = db.obtenir_info_ouvrage().to_dict(orient="records")
+    else:
+        data = []
+
+    # Préparation des options pour les filtres (valeurs uniques)
+    filter_options = {
+        key: sorted({str(row.get(key, "")) for row in data if row.get(key, "")})
+        for key in form_keys
+    }
+
+    # Application des filtres si POST
+    filtered_values = data
     if request.method == 'POST':
         filters = {key: request.form.get(key) for key in form_keys}
-        filtered_values = filter_fct(filters)
-        return render_template(template, filtered_values=filtered_values, **filters)
-    
-    chroniques = Chroniques()
-
-    tab_chroniques = chroniques.filtre()
-    tab_pt_prelev = db.obtenir_info_prelevement()
-    tab_ouvrages = db.obtenir_info_ouvrage()
+        for key, value in filters.items():
+            if value:
+                filtered_values = [row for row in filtered_values if str(row.get(key, "")) == value]
+    else:
+        filters = {}
 
     return render_template(
         template,
-        tab_chroniques = tab_chroniques,
-        tab_ouvrages = tab_ouvrages,
-        tab_pt_prelev = tab_pt_prelev
+        filter_fields=form_keys,
+        filter_labels={  # à adapter selon vos besoins
+            'annee': 'Année',
+            'libelle_usage': 'Usage',
+            'nom_commune': 'Commune',
+            'libelle_departement': 'Département',
+            'nom_ouvrage': 'Ouvrage'
+        },
+        filter_options=filter_options,
+        filtered_values=filtered_values,
+        **filters
     )
 
 ################################

@@ -13,6 +13,7 @@ from Model.chroniques import *
 from io import BytesIO
 import base64
 from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
+
 # -------------- HISTOGRAMME -------------------#
 
 sns.set_theme(style='ticks')
@@ -105,9 +106,6 @@ def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y
     plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
-# ------------------------------------------------------------- #
-# ---------------------- GRAPHIQUES FINAUX ------------------------------ #
-# ------------------------------------------------------------- #
 
 chroniques = Chroniques()
 
