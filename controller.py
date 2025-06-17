@@ -13,8 +13,8 @@ import matplotlib
 from flask_caching import Cache
 import time
 from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
-import Model.model as db
-from Model.chroniques import *
+import model.model as db
+from model.chroniques import *
 import folium
 from flask import jsonify
 
