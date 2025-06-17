@@ -8,7 +8,7 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 
 # ! Installer Flask-Caching depuis le terminal avec la commande : pip install flask-caching redis
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,redirect, url_for, flash
 import matplotlib
 from graphiques import sns_horizontalbarplot, sns_pie, histo_horiz, evo
 import model.model as db
@@ -17,7 +17,10 @@ from flask import jsonify
 import threading
 from model.cache import cache
 from model.chroniques import cache_chroniques
-
+from flask_mail import Mail, Message
+import os
+from dotenv import load_dotenv # N'oublie pas d'ajouter cette ligne si tu utilises .env
+import requests
 
 #####################################################################
 # CONFIGURATION
@@ -25,7 +28,7 @@ from model.chroniques import cache_chroniques
 
 # Déclaration de l'application Flask
 app = Flask(__name__)
-
+load_dotenv() # Appelle cette fonction au début de ton fichier si tu utilises .env
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
@@ -373,6 +376,9 @@ def a_propos_equipe():
         sub_header_template="about.html"
     )
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html', page_title="Contact")
 ################################
 # LANCEMENT DE L'APPLICATION
 ################################
