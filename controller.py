@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, evo_graph
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, evo
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -28,7 +28,7 @@ app = Flask(__name__)
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
+app.config['CACHE_REDIS_HOST'] = '10.10.9.48'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
@@ -161,7 +161,7 @@ def tab_usages():
         
         # Volume par usage/environment
         if 'milieu' in filtered_data.columns:
-            volumes_usage_milieu = f'data:image/png;base64,{evo_graph(filtered_data)}'
+            volumes_usage_milieu = f'data:image/png;base64,{evo(filtered_data)}'
         else:
             volumes_usage_milieu = None 
     else:
@@ -187,8 +187,8 @@ def tab_usages():
 
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
-@cache.cached(timeout=300)
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
+@cache.cached(timeout=300)
 def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
@@ -197,27 +197,26 @@ def tab_evolution():
     """
 
     chroniques = Chroniques()
-    graphique = None
-    nom_ouvrage = None
+    data = pd.DataFrame(chroniques.donnees())
+    available_ouvrages=data['nom_ouvrage'].unique()
+    graphique = evo()
+    nom_ouvrage = 'AUDELONCOURT'
+    years = chroniques.annee()
+    usages = chroniques.usage()
 
-    if request.method == 'GET':
-        nom_ouvrage = 'AUDELONCOURT'
-
-    elif request.method == 'POST':
+    if request.method == 'POST':
         nom_ouvrage = request.form.get("nom_ouvrage")
-
-    if nom_ouvrage:
-        donnees = chroniques.filtre_ouv(nom_ouvrage)
-        if donnees:
-            df = pd.DataFrame(donnees).sort_values(by='annee')
-            graphique = sns_courbe(df)
 
     return render_template(
         'tab_evolution.html',
         graphique=graphique,
+        years = years,
+        usages = usages,
+        available_ouvrages = available_ouvrages,
         nom_ouvrage=nom_ouvrage, 
         page_title="Tableau de bord", 
-        page_sub_title="Évolution temporelle"
+        page_sub_title="Évolution temporelle",
+        sub_header_template="dashboard.html"
     )
 
 ################################

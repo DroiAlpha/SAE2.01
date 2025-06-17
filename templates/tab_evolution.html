@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="dashboard-container">
     <!-- Filtres -->
     <div class="filter-sidebar">
@@ -11,13 +10,27 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <!-- Filtre Ouvrage -->
+                    <div class="mb-3">
+                        <label class="form-label">Nom de l'Ouvrage</label>
+                        <input type="text" name="nom_ouvrage" class="form-control" value="{{ nom_ouvrage }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ouvrages</label>
+                        <select name="available_ouvrages" class="form-select">
+                            {% for ouvrage in available_ouvrages %}
+                            <option value="{{ ouvrage }}">{{ ouvrage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <!-- Filtre Année -->
                     <div class="mb-3">
                         <label class="form-label">Année</label>
                         <select name="annee" class="form-select">
-                            <option value="">Toutes</option>
-                            {% for year in available_years %}
-                            <option value="{{ year }}" {% if filters.annee == year|string %}selected{% endif %}>{{ year }}</option>
+                            {% for year in years %}
+                            <option value="{{ year }}">{{ year }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -26,28 +39,8 @@
                     <div class="mb-3">
                         <label class="form-label">Usage 1</label>
                         <select name="usage_1" class="form-select">
-                            {% for usage in available_usages %}
-                            <option value="{{ usage }}" {% if filters.usage_1 == usage %}selected{% endif %}>{{ usage }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Usage 2</label>
-                        <select name="usage_2" class="form-select">
-                            {% for usage in available_usages %}
-                            <option value="{{ usage }}" {% if filters.usage_2 == usage %}selected{% endif %}>{{ usage }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Autres filtres -->
-                    <div class="mb-3">
-                        <label class="form-label">Département</label>
-                        <select name="libelle_departement" class="form-select">
-                            <option value="">Tous</option>
-                            {% for dept in available_departements %}
-                            <option value="{{ dept }}" {% if filters.libelle_departement == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% for usage in usages %}
+                            <option value="{{ usage }}">{{ usage }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -65,14 +58,15 @@
                 <h5>Évolution Temporelle</h5>
             </div>
             <div class="card-body">
-                {% if evolution_graph %}
-                <img src="{{ evolution_graph }}" class="img-fluid" alt="Évolution des usages">
+                {% if graphique %}
+                <img src="{{ graphique }}" class="img-fluid" alt="Évolution des usages">
                 {% else %}
                 <div class="alert alert-info">
-                    Sélectionnez des usages à comparer
+                    Sélectionnez un ouvrage pour afficher le graphique.
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
