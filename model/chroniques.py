@@ -1,13 +1,16 @@
 import pandas as pd
 import numpy as np
+<<<<<<< HEAD
+=======
 
-import Model.model as db
+>>>>>>> 2550f60fd4f11c4427ef8a6878e65331b717a3c1
+import model.model as db
 
 class Chroniques:
     def __init__(self):
         self.url = "https://hubeau.eaufrance.fr/api/v1/prelevements/chroniques"
 
-    def acces_chroniques(self):
+    def acces_chroniques(self,):
         df = pd.read_json(self.url)
         info = df["data"]
         arr = np.array(info)
