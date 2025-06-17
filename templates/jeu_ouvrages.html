@@ -1,0 +1,49 @@
+<!-- Structure commune -->
+{% extends 'base.html' %}
+<!-- Contenu de la page Jeu de données Ouvrages -->
+{% block content %}
+<!-- En-tête secondaire -->
+{% include 'jeux_sub-header.html' %}
+
+<!-- Barre de filtres -->
+{% set filter_fields = ['annee', 'libelle_usage', 'nom_commune', 'libelle_departement', 'nom_ouvrage'] %}
+{% set filter_labels = {
+    'annee': 'Année',
+    'libelle_usage': 'Usage',
+    'nom_commune': 'Commune',
+    'libelle_departement': 'Département',
+    'nom_ouvrage': 'Ouvrage'
+} %}
+{% include 'jeux_filter_bar.html' %}
+
+<!-- Jeu de données Ouvrages -->
+{% set data = filtered_values if filtered_values is defined else tab_ouvrages %}
+{% if data %}
+<table>
+    <thead>
+        <tr>
+            <th>Code Ouvrage</th>
+            <th>Nom</th>
+            <th>Commune</th>
+            <th>Département</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in tab_ouvrages %}
+        <tr>
+            <td>{{ row.code_ouvrage }}</td>
+            <td>{{ row.nom_ouvrage }}</td>
+            <td>{{ row.nom_commune }}</td>
+            <td>{{ row.libelle_departement }}</td>
+            <td>{{ row.latitude }}</td>
+            <td>{{ row.longitude }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Aucune donnée disponible.</p>
+{% endif %}
+{% endblock %}

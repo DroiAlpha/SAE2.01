@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %} {% block content %}
+
+  <nav class="sub-nav">
+    <ul>
+      <li><a href="#">Manuel d'utilisation</a></li>
+      <li><a href="#" class="active">Notre équipe projet</a></li>
+    </ul>
+  </nav>
+
+  <section class="team-container">
+    <div class="team-grid">
+      
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/6015 - Clémence Losa.jpg' %}" alt="Photo de Clémence Losa">
+          </div>
+          <div class="member-info">
+            <h3>Clémence</h3>
+            <p>"Dans la vie, rien n’est à craindre, tout est à comprendre." – Marie Curie</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/6001 - Willy KOY.jpg' %}" alt="Photo de Willy KOY">
+          </div>
+          <div class="member-info">
+            <h3>Willy</h3>
+            <p>"Fait ou ne fait pas il n'y a pas d'essai."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/6000 - Amaury Romeo Delacoux.jpg' %}" alt="Photo de Amaury Romeo Delacoux">
+          </div>
+          <div class="member-info">
+            <h3>Amaury</h3>
+            <p>"Quitters never win and winners never quit."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/6021 - Idriss Haroussi.jpg' %}" alt="Photo de Idriss Haroussi">
+          </div>
+          <div class="member-info">
+            <h3>Idriss</h3>
+            <p>"La meilleure façon de prédire l’avenir, c’est de l’inventer."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/6012 - Massinissa Guerrouah.jpg' %}" alt="Photo de Massinissa Guerrouah">
+          </div>
+          <div class="member-info">
+            <h3>Massy</h3>
+            <p>"La passion facilite le travail."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="member-card-content">
+          <div class="member-icon">
+            <img src="{% static 'images/5997 - Théo Yuri Castano.jpg' %}" alt="Photo de Théo Yuri Castano">
+          </div>
+          <div class="member-info">
+            <h3>Théo</h3>
+            <p>Ma Citation – L'enfer c'est les autres.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+{% endblock %}

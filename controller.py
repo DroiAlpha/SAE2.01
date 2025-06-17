@@ -1,183 +1,387 @@
+"""
+Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
+"""
+
 #####################################################################
 # IMPORTATION DES MODULES
 #####################################################################
-# ! Il vous faut installer : pip install flask-caching redis
-from flask import Flask, render_template, request
+
+# ! Installer Flask-Caching depuis le terminal avec la commande : pip install flask-caching redis
+
+from flask import Flask, render_template, request,redirect, url_for, flash
 import matplotlib
-from flask_caching import Cache
-import time
-from Graphiques import *
-import Model.model as db  
-from Model.Chroniques import *
+from graphiques import sns_horizontalbarplot, sns_pie, histo_horiz, evo
+import model.model as db
+from model.chroniques import *
+from flask import jsonify
+import threading
+from model.cache import cache
+from model.chroniques import cache_chroniques
+from flask_mail import Mail, Message
+import os
+from dotenv import load_dotenv # N'oublie pas d'ajouter cette ligne si tu utilises .env
+import requests
+
 #####################################################################
 # CONFIGURATION
 #####################################################################
 
 # Déclaration de l'application Flask
 app = Flask(__name__)
+load_dotenv() # Appelle cette fonction au début de ton fichier si tu utilises .env
+# Importation du serveur Redis hébergé sur la VM pour le cache
 
-# Import le server Redis de la vm 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
+app.config['CACHE_REDIS_HOST'] = '10.10.3.132'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
-cache = Cache(app)
 
+cache.init_app(app)
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
 
 # Route pour tester si Redis fonctionne si ça fonctionne la page va montrer le même temps pendant 10 secondes puis changer
-@app.route("/test_cache")
-@cache.cached(timeout=10) 
-def test_cache():
-    return f"Time: {time.time()}"
+
+#####################################################################
+# ROUTES
+#####################################################################
+
+with app.app_context():
+    cache_chroniques()  # Charge les données des chroniques au démarrage de l'application  
+    thread = threading.Thread()
+    thread.start()
+    
+################################
+# ACCUEIL
+################################
 
 # Route pour la page d'accueil "index.html"
 @app.route("/")
-@cache.cached(timeout=300)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
     """
     # Affichage du template
-    return render_template('index.html')
+    return render_template(
+        'index.html', 
+        page_title="Accueil"
+    )
 
-# Route pour la page d'à propos "apropos.html"
-@app.route('/apropos')
-def apropos():
-    """
-    Fonction de définition de l'adresse de la page d'à propos "apropos.html"
-    """
-    # Affichage du template
-    return render_template('apropos.html')
+################################
+# TABLEAU DE BORD
+################################
 
-# Route pour la page d'affichage des tableaux intermédiaires "data_tab.html"
-@app.route('/data_tab')
-# Fonction générique de transmission des valeurs filtrées d'un tableau
-def render_filtered_template(template, filter_fct, form_keys):
+# Route pour la page de la carte des prélèvements en eau "tab_carte.html"
+
+@app.route('/tableau-bord/carte-prelevements')
+def tab_carte():
+    """Renvoie la map avec les deux layers : les prélèvements et la heatmap"""
+    return render_template(
+        'carte.html',
+        page_title="Tableau de bord",
+        page_sub_title="Carte des prélèvements",
+        sub_header_template="dashboard.html"
+    )
+
+@app.route('/api/map-data')
+@cache.cached(timeout=500)
+def get_map_data():
+    """Api pour récupérer les données de la carte des prélèvements"""
+    ouvrages = db.obtenir_info_ouvrage()
+    chroniques, data = cache_chroniques()
+    heatmap_data = data
+    
+    prelevements = []
+    for _, row in ouvrages.iterrows():
+        try:
+            lat = float(row['latitude'])
+            lng = float(row['longitude'])
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                prelevements.append({
+                    'lat': lat,
+                    'lng': lng,
+                    'name': str(row['nom_ouvrage'])[:50],
+                    'code': str(row['code_ouvrage'])
+                })
+        except (ValueError, TypeError):
+            continue
+    
+    heatmap_points = []
+    for _, row in heatmap_data.iterrows():
+        try:
+            lat = float(row['latitude'])
+            lng = float(row['longitude'])
+            vol = float(row.get('volume', 1))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                heatmap_points.append([lat, lng, vol])
+        except (ValueError, TypeError):
+            continue
+
+    return jsonify({
+        'prelevements': prelevements,
+        'heatmap': heatmap_points
+    })
+    
+# Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
+@app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'],)
+def tab_usages():
+    chroniques, data = cache_chroniques()
+    data = pd.DataFrame(data)
+    filters = {
+        "annee": request.form.get("annee"),
+        "libelle_usage": request.form.get("libelle_usage"),
+        "nom_commune": request.form.get("nom_commune"),
+        "libelle_departement": request.form.get("libelle_departement"),
+        "nom_ouvrage": request.form.get("nom_ouvrage")
+    } if request.method == 'POST' else {}
+
+    filtered_data = data.copy()
+    if filters:
+        if filters.get("annee"):
+            filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
+        if filters.get("libelle_usage"):
+            filtered_data = filtered_data[filtered_data['libelle_usage'] == filters["libelle_usage"]]
+        if filters.get("nom_commune"):
+            filtered_data = filtered_data[filtered_data['nom_commune'] == filters["nom_commune"]]
+        if filters.get("libelle_departement"):
+            filtered_data = filtered_data[filtered_data['libelle_departement'] == filters["libelle_departement"]]
+        if filters.get("nom_ouvrage"):
+            filtered_data = filtered_data[filtered_data['nom_ouvrage'] == filters["nom_ouvrage"]]
+
+    if not filtered_data.empty:
+        usage_counts = filtered_data['libelle_usage'].value_counts()
+        diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
+
+        hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
+        hist_data.columns = ['dep', 'value']
+        histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
+
+        filter_cols = [k for k, v in filters.items() if v]
+        filter_vals = [int(v) if k == 'annee' else v for k, v in filters.items() if v]
+
+        histo_img = histo_horiz(filter_cols if filter_cols else None,
+                                filter_vals if filter_vals else None)
+        volumes_usage_milieu = f'data:image/png;base64,{histo_img}' if histo_img else None
+    else:
+        diagramme_circulaire = None
+        histogrammehorizon = None
+        volumes_usage_milieu = None
+
+    return render_template(
+        'tab_usages.html',
+        diagramme_circulaire=diagramme_circulaire,
+        histogrammehorizon=histogrammehorizon,
+        volumes_usage_milieu=volumes_usage_milieu,
+        filters=filters,
+        available_years=sorted(data['annee'].unique()),
+        available_usages=data['libelle_usage'].unique(),
+        available_communes=data['nom_commune'].unique(),
+        available_departements=data['libelle_departement'].unique(),
+        available_ouvrages=data['nom_ouvrage'].unique(),
+        page_title="Tableau de bord",
+        page_sub_title="Usages de l'eau",
+        sub_header_template="dashboard.html"
+    )
+
+
+
+# Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
+@app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
+def tab_evolution():
+    """
+    Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
+    Affiche un graphique linéaire multiple filtrable par année, usage, et nom d'ouvrage
+    """
+
+    chroniques, data = cache_chroniques()
+    data = pd.DataFrame(data)
+    available_ouvrages=data['nom_ouvrage'].unique()
+    graphique = evo()
+    nom_ouvrage = 'AUDELONCOURT'
+    years = chroniques.annee()
+    usages = chroniques.usage()
+
+    # Valeurs par défaut
+    nom_ouvrage = 'AUDELONCOURT'
+    annee = None
+    colonne_filtre = []
+    valeur_filtre = []
+
+    if request.method == 'POST':
+        # Récupérer les filtres s'ils sont soumis
+        nom_ouvrage = request.form.get('available_ouvrages')
+        annee = request.form.get('annee')
+
+        # Ajouter aux filtres si sélectionné
+        if nom_ouvrage:
+            colonne_filtre.append('nom_ouvrage')
+            valeur_filtre.append(nom_ouvrage)
+        if annee:
+            colonne_filtre.append('annee')
+            valeur_filtre.append(annee)
+
+    # Génération du graphique avec ou sans filtres
+    if colonne_filtre and valeur_filtre:
+        graphique = evo(colonne_filtre, valeur_filtre)
+    else:
+        graphique = evo()
+
+    return render_template(
+        'tab_evolution.html',
+        graphique=graphique,
+        years=years,
+        usages=usages,
+        available_ouvrages=available_ouvrages,
+        nom_ouvrage=nom_ouvrage,
+        page_title="Tableau de bord",
+        page_sub_title="Évolution temporelle",
+        sub_header_template="dashboard.html"
+    )
+
+
+
+################################
+# JEUX DE DONNÉES
+################################
+
+# Route pour la page du jeu de données pour les chroniques "jeu_chroniques.html"
+@app.route('/jeux-donnees/chroniques')
+def jeu_chroniques():
+    """
+    Route pour la page du jeu de données pour les chroniques "jeu_chroniques.html"
+    Affiche les données chroniques d'eau prélevée dans un tableau, avec des filtres pour affiner la recherche
+    """
+    # Fonction générique de transmission des valeurs filtrées d'un tableau
+    chroniques, data = cache_chroniques()
+    return render_filtered_template(
+        'jeu_chroniques.html',
+        chroniques().filtre,
+        form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"],
+        data_type="chroniques",
+        page_title="Jeux de données", 
+        page_sub_title="Chroniques"
+    )
+
+# Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
+@app.route('/jeux-donnees/points-prelevement')
+def jeu_points_prelevement():
+    """
+    Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
+    Affiche les points de prélèvement d'eau dans un tableau, avec des filtres pour affiner la recherche
+    """
+    # Fonction générique de transmission des valeurs filtrées d'un tableau
+    return render_filtered_template(
+        'jeu_points_prelevement.html',
+        None,
+        form_keys=["code_point", "nom_point", "nom_commune", "libelle_departement"],
+        data_type="points_prelevement", 
+        page_title="Jeux de données", 
+        page_sub_title="Points de prélèvement"
+    )
+
+# Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html"
+@app.route('/jeux-donnees/ouvrages')
+def jeu_ouvrages():
+    """
+    Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html
+    Affiche les ouvrages d'eau dans un tableau, avec des filtres pour affiner la recherche
+    """
+    # Fonction générique de transmission des valeurs filtrées d'un tableau
+    return render_filtered_template(
+        'jeu_ouvrages.html',
+        None,
+        form_keys=["code_ouvrage", "nom_ouvrage", "nom_commune", "libelle_departement"],
+        data_type="ouvrages", 
+        page_title="Jeux de données", 
+        page_sub_title="Ouvrages"
+    )
+
+def render_filtered_template(template, filter_fct, form_keys, data_type="chroniques"):
     """
     Fonction générique de transmission des valeurs filtrées d'un tableau
-    Je dois mettre les données des 3 tableaux (chroniques, pt_prelevement, ouvrage)
-    DANS la fonctions
     """
+    chroniques, data = cache_chroniques()
+    # Récupération des données selon le type
+    if data_type == "chroniques":
+        data = chroniques.donnees()
+    elif data_type == "points_prelevement":
+        data = db.obtenir_info_prelevement()
+    elif data_type == "ouvrages":
+        data = db.obtenir_info_ouvrage().to_dict(orient="records")
+    else:
+        data = []
+
+    # Préparation des options pour les filtres (valeurs uniques)
+    filter_options = {
+        key: sorted({str(row.get(key, "")) for row in data if row.get(key, "")})
+        for key in form_keys
+    }
+
+    # Application des filtres si POST
+    filtered_values = data
     if request.method == 'POST':
         filters = {key: request.form.get(key) for key in form_keys}
-        filtered_values = filter_fct(filters)
-        return render_template(template, filtered_values=filtered_values, **filters)
-    
-    chroniques = Chroniques()
-
-    tab_chroniques = chroniques.donnees()
-    tab_pt_prelev = db.obtenir_info_prelevement()
-    tab_ouvrages = db.obtenir_info_ouvrage()
-
-    return render_template(template,
-                           tab_chroniques = tab_chroniques,
-                           tab_ouvrages = tab_ouvrages,
-                           tab_pt_prelev = tab_pt_prelev
-                           )
-
-@app.route('/Carte',  methods=['GET', 'POST'])
-def map():
-    """
-    Route permettant d'aller a la carte
-    """
-    return render_template('map.html')
-
-@app.route('/Graphiques', methods=['GET', 'POST'])
-def graphiques():
-    """
-    Route pour afficher histogramme + diagramme circulaire,
-    avec ou sans filtres.
-    """
-    chroniques = Chroniques()
-    
-    # Données par défaut (non filtrées)
-    donnees = chroniques.donnees()  
-    
-    if request.method == 'POST':
-        # Récupération des filtres depuis le formulaire
-        filters = {
-            "annee": request.form.get("annee"),
-            "libelle_usage": request.form.get("libelle_usage"),
-            "nom_commune": request.form.get("nom_commune"),
-            "libelle_departement": request.form.get("libelle_departement"),
-            "nom_ouvrage": request.form.get("nom_ouvrage")
-        }
-
-        # Filtrage des données manuellement
-        filtered_data = []
-        
-        for c in donnees:
-            if (not filters["annee"] or str(c["annee"]) == filters["annee"]) and \
-               (not filters["libelle_usage"] or c["libelle_usage"] == filters["libelle_usage"]) and \
-               (not filters["nom_commune"] or c["nom_commune"] == filters["nom_commune"]) and \
-               (not filters["libelle_departement"] or c["libelle_departement"] == filters["libelle_departement"]) and \
-               (not filters["nom_ouvrage"] or c["nom_ouvrage"] == filters["nom_ouvrage"]):
-                filtered_data.append(c)
-
-        # Génération des graphiques à partir des données filtrées
-        diagramme_circulaire = sns_pie(filtered_data)
-        histogramme = sns_horizontalbarplot(filtered_data)
-
-        return render_template(
-            'Graphiques.html',
-            diagramme_circulaire=diagramme_circulaire,
-            histogramme=histogramme,
-            filters=filters  
-        )
-
-    # Si GET ou aucun filtre
-    diagramme_circulaire = sns_pie(donnees)
-    histogramme = sns_horizontalbarplot(donnees)
-    
-    return render_template(
-        'Graphiques.html',
-        diagramme_circulaire=diagramme_circulaire,
-        histogramme=histogramme,
-        filters=None
-    )
-
-
-@app.route('/Evolution', methods=['GET', 'POST'])
-def evolution():
-    """
-    Route pour afficher une courbe d'évolution pour un ouvrage.
-    L'utilisateur choisit un ouvrage, et la courbe montre les volumes selon les années.
-    """
-
-    chroniques = Chroniques()
-    graphique = None
-    nom_ouvrage = None
-
-    if request.method == 'GET':
-        nom_ouvrage = 'AUDELONCOURT'
-
-    elif request.method == 'POST':
-        nom_ouvrage = request.form.get("nom_ouvrage")
-
-    if nom_ouvrage:
-        donnees = chroniques.filtre_ouv(nom_ouvrage)
-        if donnees:
-            df = pd.DataFrame(donnees).sort_values(by='annee')
-            graphique = sns_courbe(df)
+        for key, value in filters.items():
+            if value:
+                filtered_values = [row for row in filtered_values if str(row.get(key, "")) == value]
+    else:
+        filters = {}
 
     return render_template(
-        'Evolution.html',
-        graphique=graphique,
-        nom_ouvrage=nom_ouvrage
+        template,
+        filter_fields=form_keys,
+        filter_labels={  # à adapter selon vos besoins
+            'annee': 'Année',
+            'libelle_usage': 'Usage',
+            'nom_commune': 'Commune',
+            'libelle_departement': 'Département',
+            'nom_ouvrage': 'Ouvrage'
+        },
+        filter_options=filter_options,
+        filtered_values=filtered_values,
+        **filters
     )
 
+################################
+# À PROPOS
+################################
 
-# ------- OPTIONNELS ----------#
+# Route pour la page s'à propos sur le manuel d'utilisation de l'application "a_propos_manuel.html"
+@app.route('/a-propos/manuel-utilisation')
+def a_propos_manuel():
+    """
+    Fonction de définition de l'adresse de la page d'à propos sur le manuel d'utilisation de l'application "a_propos_manuel.html"
+    Cette page fournit des informations sur l'utilisation de l'application, les fonctionnalités disponibles et comment naviguer dans le site
+    """
+    # Affichage du template
+    return render_template(
+        'a_propos_manuel.html', 
+        page_title="À propos",
+        page_sub_title="Manuel d'utilisation",
+        sub_header_template="about.html"
+    )
 
-@app.route('/connexion')
-def connexion():
-    pass
+# Route pour la page d'à propos sur l'équipe projet "a_propos_equipe.html"
+@app.route('/a-propos/notre-equipe-projet')
+def a_propos_equipe():
+    """
+    Fonction de définition de l'adresse de la page d'à propos sur l'équipe projet "a_propos_equipe.html"
+    Cette page présente l'équipe projet, ses membres et leurs rôles dans le développement de l'application
+    """
+    # Affichage du template
+    return render_template(
+        'a_propos_equipe.html', 
+        page_title="À propos", 
+        page_sub_title="Notre équipe projet",
+        sub_header_template="about.html"
+    )
 
-@app.route('/forum')
-def forum():
-    pass
+@app.route('/contact')
+def contact():
+    return render_template('contact.html', page_title="Contact")
+################################
+# LANCEMENT DE L'APPLICATION
+################################
 
 if __name__ == '__main__':
     app.run(debug=True)

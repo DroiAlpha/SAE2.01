@@ -1,0 +1,49 @@
+<!-- Structure commune -->
+{% extends 'base.html' %}
+<!-- Contenu de la page Jeu de données Chroniques -->
+{% block content %}
+<!-- En-tête secondaire -->
+{% include 'jeux_sub-header.html' %}
+
+<!-- Barre de filtres -->
+{% set filter_fields = ['annee', 'libelle_usage', 'nom_commune', 'libelle_departement', 'nom_ouvrage'] %}
+{% set filter_labels = {
+    'annee': 'Année',
+    'libelle_usage': 'Usage',
+    'nom_commune': 'Commune',
+    'libelle_departement': 'Département',
+    'nom_ouvrage': 'Ouvrage'
+} %}
+{% include 'jeux_filter_bar.html' %}
+
+<!-- Jeu de données Chroniques -->
+{% set data = filtered_values if filtered_values is defined else tab_chroniques %}
+{% if data %}
+<table>
+    <thead>
+        <tr>
+            <th>Année</th>
+            <th>Usage</th>
+            <th>Commune</th>
+            <th>Département</th>
+            <th>Ouvrage</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in data %}
+        <tr>
+            <td>{{ row.annee }}</td>
+            <td>{{ row.libelle_usage }}</td>
+            <td>{{ row.nom_commune }}</td>
+            <td>{{ row.libelle_departement }}</td>
+            <td>{{ row.nom_ouvrage }}</td>
+            <td>{{ row.volume }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Aucune donnée disponible.</p>
+{% endif %}
+{% endblock %}
