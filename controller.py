@@ -28,7 +28,7 @@ load_dotenv() # Appelle cette fonction au début de ton fichier si tu utilises .
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '192.168.1.24'
+app.config['CACHE_REDIS_HOST'] = '192.168.0.36'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
@@ -343,31 +343,18 @@ def render_filtered_template(template, filter_fct, form_keys, data_type="chroniq
 # Route pour la page s'à propos sur le manuel d'utilisation de l'application "a_propos_manuel.html"
 @app.route('/a-propos/manuel-utilisation')
 def a_propos_manuel():
-    """
-    Fonction de définition de l'adresse de la page d'à propos sur le manuel d'utilisation de l'application "a_propos_manuel.html"
-    Cette page fournit des informations sur l'utilisation de l'application, les fonctionnalités disponibles et comment naviguer dans le site
-    """
-    # Affichage du template
     return render_template(
-        'a_propos_manuel.html', 
-        page_title="À propos",
-        page_sub_title="Manuel d'utilisation",
-        sub_header_template="about.html"
+        'a_propos_manuel.html',
+        page_title="Manuel d'utilisation",
+        sub_header_template="about.html"  # Active le sous-header
     )
 
-# Route pour la page d'à propos sur l'équipe projet "a_propos_equipe.html"
 @app.route('/a-propos/notre-equipe-projet')
 def a_propos_equipe():
-    """
-    Fonction de définition de l'adresse de la page d'à propos sur l'équipe projet "a_propos_equipe.html"
-    Cette page présente l'équipe projet, ses membres et leurs rôles dans le développement de l'application
-    """
-    # Affichage du template
     return render_template(
         'a_propos_equipe.html', 
-        page_title="À propos", 
-        page_sub_title="Notre équipe projet",
-        sub_header_template="about.html"
+        page_title="Notre équipe",
+        sub_header_template="about.html"  # Active le sous-header
     )
 
 @app.route('/contact')
