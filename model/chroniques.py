@@ -1,5 +1,9 @@
 import pandas as pd
 import numpy as np
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2550f60fd4f11c4427ef8a6878e65331b717a3c1
 import model.model as db
 
 class Chroniques:
