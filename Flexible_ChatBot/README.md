@@ -6,6 +6,8 @@ This intelligent chatbot is a flexible and contextual conversational assistant, 
 
 Required Modifications for Setup : 
 
+    Installation package : pip install Flask python-dotenv langchain langgraph langchain-core langchain-community langchain-huggingface huggingface-hub faiss-cpu sentence-transformers typing-extensions requests beautifulsoup4
+
     1)
         Go to the .env file and place an API key, ex :
         GOOGLE_API_KEY=CLÉ
