@@ -380,6 +380,10 @@ def a_propos_equipe():
         sub_header_template="about.html"  # Active le sous-header
     )
 
+@app.route('/8743b52063cd84097a65d1633f5c74f5')
+def info_prelevement():
+    return render_template('info_prelevement.html')
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html', page_title="Contact")
