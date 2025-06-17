@@ -13,6 +13,12 @@
 <body>
   <!-- En-tête principal -->
   {% include 'header.html' %}
+
+    <!-- Sub-header (si voulu) -->
+  {% if sub_header_template %}
+    {% include 'includes/sub_header/' + sub_header_template %}
+  {% endif %}
+
   <!-- Contenu principal de la page -->
   {% block content %}{% endblock %}
   <!-- Pied de page -->

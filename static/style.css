@@ -30,6 +30,7 @@ header {
     padding: 0 2rem;
     height: 70px;
     background: linear-gradient(90deg, #2ec4e6 0%, #1a8bb8 100%);
+    max-height: min-content;
 }
 
 .logo {
@@ -53,7 +54,7 @@ header {
 h1 {
     grid-column: 2;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: #fff;
     margin: 0;
 }
@@ -194,6 +195,43 @@ h1 {
 .filter-arrow.rotated {
     transform: rotate(180deg);
 }
+
+.sub-header.dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0 0.75rem 0; /* No top padding, bottom remains */
+    background: linear-gradient(to right, #B0E0E6, #40E0D0);
+}
+
+.sub-header.dashboard h1 {
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.sub-navbar ul {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    list-style: none;
+}
+
+.sub-navbar li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.3rem 0.3rem;
+    border-radius: 0.5rem;
+    transition: background 0.3s ease;
+}
+
+.sub-navbar li a:hover,
+.sub-navbar li a.active {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
 
 /********************************************/
 /* Carte */

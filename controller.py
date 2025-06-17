@@ -80,7 +80,8 @@ def tab_carte():
     return render_template(
         'carte.html',
         page_title="Tableau de bord",
-        page_sub_title="Carte des prélèvements"
+        page_sub_title="Carte des prélèvements",
+        sub_header_template="dashboard.html"
     )
 
 @app.route('/api/map-data')
