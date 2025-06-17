@@ -44,6 +44,23 @@ class Chroniques:
                 L.append(c)
         return L
     
+    def filtre_ulti(self, colonne: list = None, filtre: list = None):
+        """
+        Renvoie une liste avec les données filtrées
+        ATTENTION : les colonnes filtrées doivent etre au meme indice que les filtres
+        (genre, le filtre d'indice 0 doit etre de la colonne d'indice 0, etc)
+        """
+        chroniques = self.donnees()
+        L = []
+        for c in chroniques:
+            if colonne and filtre:
+                for i, j in zip(colonne, filtre):
+                    if c[i] == j:
+                        L.append(c)
+            else:
+                L.append(c)
+        return L
+    
     def filtre_ouv(self, nom_ouvrage):
         """
         Retourne une liste de dictionnaires contenant les volumes et années
