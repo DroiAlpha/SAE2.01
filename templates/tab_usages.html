@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="dashboard-wrapper">
-    <!-- Filtre Sidebar -->
+    <!-- barre de Filtre  -->
     <div class="filter-sidebar">
         <div class="filter-card">
             <div class="filter-header">
@@ -11,7 +10,7 @@
             </div>
             <div class="filter-body">
                 <form method="POST" action="{{ url_for('tab_usages') }}">
-                    <!-- Annee Filtre -->
+                    <!-- Filtre année -->
                     <div class="filter-group">
                         <label for="annee">Année</label>
                         <select id="annee" name="annee">
@@ -22,7 +21,7 @@
                         </select>
                     </div>
                     
-                    <!-- Usage Filtre -->
+                    <!-- Filtre usage -->
                     <div class="filter-group">
                         <label for="libelle_usage">Usage</label>
                         <select id="libelle_usage" name="libelle_usage">
@@ -33,7 +32,7 @@
                         </select>
                     </div>
                     
-                    <!-- Department Filtre -->
+                    <!-- Filtre dep -->
                     <div class="filter-group">
                         <label for="libelle_departement">Département</label>
                         <select id="libelle_departement" name="libelle_departement">
@@ -44,7 +43,7 @@
                         </select>
                     </div>
                     
-                    <!-- Commune Filtre -->
+                    <!-- Filtre commune -->
                     <div class="filter-group">
                         <label for="nom_commune">Commune</label>
                         <select id="nom_commune" name="nom_commune">
@@ -55,7 +54,7 @@
                         </select>
                     </div>
                     
-                    <!-- ouvrage Filtre -->
+                    <!-- Filtre Structure -->
                     <div class="filter-group">
                         <label for="nom_ouvrage">Ouvrage</label>
                         <select id="nom_ouvrage" name="nom_ouvrage">
@@ -75,9 +74,7 @@
         </div>
     </div>
 
-    <!-- Graphs Content -->
     <div class="graphs-content">
-        <!-- graphe diagramme_circulaire -->
         <div class="graph-card">
             <div class="graph-header">
                 Répartition des usages
@@ -94,14 +91,13 @@
             </div>
         </div>
 
-        <!-- Horizontal Bar Chart -->
         <div class="graph-card">
             <div class="graph-header">
                 Ouvrages par département
             </div>
             <div class="graph-container">
-                {% if histogramme %}
-                    <img src="{{ histogramme }}" alt="Histogramme par département">
+                {% if histogrammehorizon %}
+                    <img src="{{ histogrammehorizon }}" alt="Nombre d'ouvrages par département">
                 {% else %}
                     <div class="no-data">
                         <i class="fas fa-chart-bar"></i>
@@ -111,59 +107,21 @@
             </div>
         </div>
 
-        <!-- Evolution Chart -->
         <div class="graph-card">
             <div class="graph-header">
-                Évolution des volumes
+                Volume d'eau par usage et milieu
             </div>
             <div class="graph-container">
-                {% if evolution_graph %}
-                    <img src="{{ evolution_graph }}" alt="Évolution des volumes">
+                {% if volumes_usage_milieu %}
+                    <img src="{{ volumes_usage_milieu }}" alt="Volume d'eau par usage et milieu">
                 {% else %}
                     <div class="no-data">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Aucune donnée disponible</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Grouped Bar Chart -->
-        <div class="graph-card">
-            <div class="graph-header">
-                Volumes par usage/milieu
-            </div>
-            <div class="graph-container">
-                {% if histogramme_horizontal %}
-                    <img src="{{ histogramme_horizontal }}" alt="Volumes par usage">
-                {% else %}
-                    <div class="no-data">
-                        <i class="fas fa-chart-bar"></i>
-                        <p>Aucune donnée disponible</p>
+                        <i class="fas fa-water"></i>
+                        <p>Aucune donnée sur les milieux disponible</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const deptSelect = document.getElementById('libelle_departement');
-        const communeSelect = document.getElementById('nom_commune');
-        
-        if (deptSelect && communeSelect) {
-            deptSelect.addEventListener('change', function() {
-                if (this.value) {
-                    communeSelect.disabled = true;
-                    communeSelect.value = '';
-                } else {
-                    communeSelect.disabled = false;
-                }
-            });
-        }
-    });
-</script>
 {% endblock %}

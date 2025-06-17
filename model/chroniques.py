@@ -68,16 +68,23 @@ class Chroniques:
                 L.append(c['annee'])
         return L
     
-    def data_evo(self, usage, exp: int): # FILTARGE FAISABLE
-        annees = self.annee()  # c une liste
-        L = []
-        for annee in annees:
-            temp = 0
-            for d in self.filtre():
-                if d['annee'] == annee and d['libelle_usage'] == usage:
-                    temp += d['volume']
-            L.append(temp * exp)
-        return L
+    def data_evo(self, usage, exp: int, colonne: list = None, filtre: list = None): # FILTARGE FAISABLE
+            annees = self.annee()  # c une liste
+            L = []
+            for annee in annees:
+                temp = 0
+                if colonne and filtre:
+                    for d in self.filtre(colonne, filtre):
+                        if d['annee'] == annee and d['libelle_usage'] == usage:
+                            temp += d['volume']
+                    L.append(temp * exp)
+                else:
+                    for d in self.filtre():
+                        if d['annee'] == annee and d['libelle_usage'] == usage:
+                            temp += d['volume']
+                    L.append(temp * exp)
+            return L 
+
 
     def min_annee(self):
         return str(min(self.annee()))
@@ -100,27 +107,39 @@ class Chroniques:
     def usage(self):
         return ['EAU POTABLE', 'INDUSTRIE et ACTIVITES ECONOMIQUES (hors irrigation, hors énergie)']
     
-    def usage2(self): # FILTRAGE FAISABLE
-        L = []
-        for usage in self.usage():
-            i = 0
-            for elt in self.filtre():
-                if elt['libelle_usage'] == usage:
-                    i += 1
-            L.append(i)
-        return L
+    def usage2(self, colonne: list = None, filtre: list = None): # FILTRAGE FAISABLE
+            L = []
+            for usage in self.usage():
+                i = 0
+                if colonne and filtre:
+                    for elt in self.filtre(colonne, filtre):
+                        if elt['libelle_usage'] == usage:
+                            i += 1
+                    L.append(i)
+                else:
+                    for elt in self.filtre():
+                        if elt['libelle_usage'] == usage:
+                            i += 1
+                    L.append(i)
+            return L
     
-    def compte_dep(self): # FILTRAGE FAISABLE
-        dic = {}
-        chroniques = self.filtre()
-        for c in chroniques:
-            if c['code_departement'] not in dic:
-                dic[c['code_departement']] = 1
-            else :
-                dic[c['code_departement']] += 1
-        
-        retour = [{"dep": dep, "value": count} for dep, count in dic.items()]
-        return retour
+    def compte_dep(self, colonne: list = None, filtre: list = None): # FILTRAGE FAISABLE
+            dic = {}
+            if colonne and filtre:
+                for c in self.filtre(colonne, filtre):
+                    if c['code_departement'] not in dic:
+                        dic[c['code_departement']] = 1
+                    else :
+                        dic[c['code_departement']] += 1
+            else:
+                for c in self.filtre():
+                    if c['code_departement'] not in dic:
+                        dic[c['code_departement']] = 1
+                    else :
+                        dic[c['code_departement']] += 1
+
+            retour = [{"dep": dep, "value": count} for dep, count in dic.items()]
+            return retour
     
     def milieux(self):
         ouvrages = db.obtenir_info_ouvrage()

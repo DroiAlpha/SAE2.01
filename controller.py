@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo, histo_horiz, sns_courbe_double
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -27,11 +27,10 @@ app = Flask(__name__)
 
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
-# Décommenter les lignes suivantes pour utiliser RedisCache
-# app.config['CACHE_TYPE'] = 'RedisCache'
-# app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
-# app.config['CACHE_REDIS_PORT'] = 6379
-# app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_HOST'] = '10.10.41.217'
+app.config['CACHE_REDIS_PORT'] = 6379
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
 # Utilisation du cache simple pour le développement local
 app.config['CACHE_TYPE'] = 'SimpleCache'
@@ -57,7 +56,6 @@ def test_cache():
 
 # Route pour la page d'accueil "index.html"
 @app.route("/")
-@cache.cached(timeout=300)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
@@ -126,8 +124,8 @@ def get_map_data():
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
 def tab_usages():
     chroniques = Chroniques()
-    data = pd.DataFrame(chroniques.donnees())  # Convertir en DataFrame paske amaury est goofy mdr
-    
+    data = pd.DataFrame(chroniques.donnees())
+
     filters = {
         "annee": request.form.get("annee"),
         "libelle_usage": request.form.get("libelle_usage"),
@@ -136,7 +134,7 @@ def tab_usages():
         "nom_ouvrage": request.form.get("nom_ouvrage")
     } if request.method == 'POST' else None
 
-    #  Filtrer les données en fonction des filtres sélectionnés
+    # Apply filters
     if filters:
         filtered_data = data.copy()
         if filters["annee"]:
@@ -152,24 +150,30 @@ def tab_usages():
     else:
         filtered_data = data
 
-    # Si des données sont filtrées, créer les graphiques
+    # Generate graphs
     if not filtered_data.empty:
-        # Diagramme circulaire
+        # Pie chart
         usage_counts = filtered_data['libelle_usage'].value_counts()
         diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
         
-        # Bar horizontal
+        # histogramme horizontal
         hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
         hist_data.columns = ['dep', 'value']
-        histogramme = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre ouvrages", "Départements", "Nombre ouvrages par département")}'
+        histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
+        
+        # Volume par usage/environment
+        volumes_usage_milieu = f'data:image/png;base64,{histo_horiz()}'
+        
     else:
         diagramme_circulaire = None
-        histogramme = None
+        histogrammehorizon = None
+        volumes_usage_milieu = None
     
     return render_template(
         'tab_usages.html',
         diagramme_circulaire=diagramme_circulaire,
-        histogramme=histogramme,
+        histogrammehorizon=histogrammehorizon,
+        volumes_usage_milieu=volumes_usage_milieu,
         filters=filters,
         available_years=sorted(data['annee'].unique()),
         available_usages=data['libelle_usage'].unique(),
@@ -183,6 +187,8 @@ def tab_usages():
 
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
+@app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
+@cache.cached(timeout=300)
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
 def tab_evolution():
     """
