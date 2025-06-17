@@ -1,10 +1,18 @@
 import pandas as pd
 import numpy as np
-<<<<<<< HEAD
-=======
-
->>>>>>> 2550f60fd4f11c4427ef8a6878e65331b717a3c1
 import model.model as db
+from model.cache import cache
+
+@cache.cached(key_prefix='donnees_chroniques', timeout=86400)
+def cache_chroniques():
+    """
+    Charge les données des chroniques depuis l'API Hubeau avec mise en cache.
+    """
+    chroniques_instance = Chroniques()
+    data_list = chroniques_instance.donnees()
+    data_df = pd.DataFrame(data_list)
+    return chroniques_instance, data_df
+
 
 class Chroniques:
     def __init__(self):
@@ -171,16 +179,17 @@ class Chroniques:
 
 # ------------- TEST ----------------------#
 
-chroniques = Chroniques()
+# chroniques = Chroniques()
 
-ouvrages = db.obtenir_info_ouvrage()
 
-ouvrages_sout = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[0]]['code_ouvrage'].tolist()
-ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1]]['code_ouvrage'].tolist()
 
-donnees = chroniques.donnees()
+# donnees = chroniques.donnees()
 
 def milieu(usage, colonne: list = None, filtre: list = None):
+    chroniques, data =  cache_chroniques()
+    ouvrages = db.obtenir_info_ouvrage()
+    ouvrages_sout = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[0]]['code_ouvrage'].tolist()
+    ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1]]['code_ouvrage'].tolist()
     volumes_par_ouvrage = {}
     if colonne and filtre:
         for c in chroniques.filtre_ulti(colonne, filtre):

@@ -10,13 +10,14 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 
 from flask import Flask, render_template, request
 import matplotlib
-from flask_caching import Cache
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz, evo
+from graphiques import sns_horizontalbarplot, sns_pie, histo_horiz, evo
 import model.model as db
 from model.chroniques import *
-import folium
 from flask import jsonify
 import threading
+from model.cache import cache
+from model.chroniques import cache_chroniques
+
 
 #####################################################################
 # CONFIGURATION
@@ -32,7 +33,7 @@ app.config['CACHE_REDIS_HOST'] = '10.10.3.132'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
-cache = Cache(app)
+cache.init_app(app)
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
 
@@ -41,16 +42,6 @@ matplotlib.use('Agg')
 #####################################################################
 # ROUTES
 #####################################################################
-@cache.cached(key_prefix='donnees_chroniques', timeout=86400) # Cache pendant 24 hours
-def cache_chroniques():
-    """
-    Fonction pour charger les données des chroniques depuis l'API Hubeau
-    et les mettre en cache.
-    """
-    chroniques_instance = Chroniques()
-    data_list = chroniques_instance.donnees() # Appelle l'API Hubeau pour récupérer les données
-    data_df = pd.DataFrame(data_list)
-    return chroniques_instance, data_df
 
 with app.app_context():
     cache_chroniques()  # Charge les données des chroniques au démarrage de l'application  
@@ -94,7 +85,8 @@ def tab_carte():
 def get_map_data():
     """Api pour récupérer les données de la carte des prélèvements"""
     ouvrages = db.obtenir_info_ouvrage()
-    heatmap_data = chroniques.donnees()
+    chroniques, data = cache_chroniques()
+    heatmap_data = data
     
     prelevements = []
     for _, row in ouvrages.iterrows():
@@ -112,16 +104,16 @@ def get_map_data():
             continue
     
     heatmap_points = []
-    for d in heatmap_data:
+    for _, row in heatmap_data.iterrows():
         try:
-            lat = float(d['latitude'])
-            lng = float(d['longitude'])
-            vol = float(d.get('volume', 1))
+            lat = float(row['latitude'])
+            lng = float(row['longitude'])
+            vol = float(row.get('volume', 1))
             if -90 <= lat <= 90 and -180 <= lng <= 180:
                 heatmap_points.append([lat, lng, vol])
         except (ValueError, TypeError):
             continue
-    
+
     return jsonify({
         'prelevements': prelevements,
         'heatmap': heatmap_points
@@ -129,10 +121,9 @@ def get_map_data():
     
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'],)
-@cache.cached(timeout=10)
 def tab_usages():
     chroniques, data = cache_chroniques()
-
+    data = pd.DataFrame(data)
     filters = {
         "annee": request.form.get("annee"),
         "libelle_usage": request.form.get("libelle_usage"),
@@ -143,8 +134,6 @@ def tab_usages():
 
     filtered_data = data.copy()
     if filters:
-        cache.clear()  # Vide le cache pour les nouveaux filtres
-        cache.set('filters', filters)  # Stocke les filtres dans le cache
         if filters.get("annee"):
             filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
         if filters.get("libelle_usage"):
@@ -195,7 +184,6 @@ def tab_usages():
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
-@cache.cached(timeout=10, query_string=True)
 def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
@@ -203,6 +191,7 @@ def tab_evolution():
     """
 
     chroniques, data = cache_chroniques()
+    data = pd.DataFrame(data)
     available_ouvrages=data['nom_ouvrage'].unique()
     graphique = evo()
     nom_ouvrage = 'AUDELONCOURT'
@@ -260,9 +249,10 @@ def jeu_chroniques():
     Affiche les données chroniques d'eau prélevée dans un tableau, avec des filtres pour affiner la recherche
     """
     # Fonction générique de transmission des valeurs filtrées d'un tableau
+    chroniques, data = cache_chroniques()
     return render_filtered_template(
         'jeu_chroniques.html',
-        Chroniques().filtre,
+        chroniques().filtre,
         form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"],
         data_type="chroniques",
         page_title="Jeux de données", 
@@ -307,7 +297,7 @@ def render_filtered_template(template, filter_fct, form_keys, data_type="chroniq
     """
     Fonction générique de transmission des valeurs filtrées d'un tableau
     """
-    chroniques = Chroniques()
+    chroniques, data = cache_chroniques()
     # Récupération des données selon le type
     if data_type == "chroniques":
         data = chroniques.donnees()
