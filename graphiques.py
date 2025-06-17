@@ -12,7 +12,7 @@ import numpy as np
 from Model.chroniques import *
 from io import BytesIO
 import base64
-from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
+from Model.model import obtenir_info_ouvrage as db
 
 # -------------- HISTOGRAMME -------------------#
 
@@ -107,9 +107,8 @@ def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
-chroniques = Chroniques()
-
 def diagramme_circu(colonne: list = None, filtre: list = None):
+    chroniques = Chroniques()
     if colonne and filtre:
         data_usages = chroniques.usage2(colonne, filtre)
     else:
@@ -117,6 +116,7 @@ def diagramme_circu(colonne: list = None, filtre: list = None):
     return sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
 
 def evo(colonne: list = None, filtre: list = None):
+    chroniques = Chroniques()
     if colonne and filtre:
         usage_1 = chroniques.data_evo(chroniques.usage()[0], 1, colonne, filtre)
         usage_2 = chroniques.data_evo(chroniques.usage()[1], 1, colonne, filtre)
@@ -126,6 +126,7 @@ def evo(colonne: list = None, filtre: list = None):
     return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
 def histo(colonne: list = None, filtre: list = None):
+    chroniques = Chroniques()
     if colonne and filtre:
         data_histo = chroniques.compte_dep(colonne, filtre)
         titre = "Histogramme du nombre d'ouvrage par département"
@@ -139,6 +140,7 @@ def histo(colonne: list = None, filtre: list = None):
     return sns_horizontalbarplot(data_histo, 'dep', 'value', x_label, y_label, titre)
 
 def histo_horiz(colonne: list = None, filtre: list = None):
+    chroniques = Chroniques()
     data_histo_2 = []
     for c in chroniques.usage():
         if colonne and filtre:

@@ -17,6 +17,7 @@ import Model.model as db
 from Model.chroniques import *
 import folium
 from flask import jsonify
+import threading
 
 #####################################################################
 # CONFIGURATION
@@ -41,15 +42,14 @@ cache = Cache(app)
 matplotlib.use('Agg')
 
 # Route pour tester si Redis fonctionne si ça fonctionne la page va montrer le même temps pendant 10 secondes puis changer
-@app.route("/test_cache")
-@cache.cached(timeout=10) 
-def test_cache():
-    return f"Time: {time.time()}"
 
 #####################################################################
 # ROUTES
 #####################################################################
-
+with app.app_context():
+    def startup():
+        thread = threading.Thread()
+        thread.start()
 ################################
 # ACCUEIL
 ################################
@@ -133,45 +133,40 @@ def tab_usages():
         "nom_commune": request.form.get("nom_commune"),
         "libelle_departement": request.form.get("libelle_departement"),
         "nom_ouvrage": request.form.get("nom_ouvrage")
-    } if request.method == 'POST' else None
+    } if request.method == 'POST' else {}
 
-    # Prepare filter lists for histo_horiz
-    filter_cols = []
-    filter_vals = []
+    filtered_data = data.copy()
     if filters:
-        if filters["annee"]:
-            filter_cols.append('annee')
-            filter_vals.append(int(filters["annee"]))
-        if filters["libelle_usage"]:
-            filter_cols.append('libelle_usage')
-            filter_vals.append(filters["libelle_usage"])
-        if filters["nom_commune"]:
-            filter_cols.append('nom_commune')
-            filter_vals.append(filters["nom_commune"])
-        if filters["libelle_departement"]:
-            filter_cols.append('libelle_departement')
-            filter_vals.append(filters["libelle_departement"])
-        if filters["nom_ouvrage"]:
-            filter_cols.append('nom_ouvrage')
-            filter_vals.append(filters["nom_ouvrage"])
+        if filters.get("annee"):
+            filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
+        if filters.get("libelle_usage"):
+            filtered_data = filtered_data[filtered_data['libelle_usage'] == filters["libelle_usage"]]
+        if filters.get("nom_commune"):
+            filtered_data = filtered_data[filtered_data['nom_commune'] == filters["nom_commune"]]
+        if filters.get("libelle_departement"):
+            filtered_data = filtered_data[filtered_data['libelle_departement'] == filters["libelle_departement"]]
+        if filters.get("nom_ouvrage"):
+            filtered_data = filtered_data[filtered_data['nom_ouvrage'] == filters["nom_ouvrage"]]
 
-    if not data.empty:
-        usage_counts = data['libelle_usage'].value_counts()
+    if not filtered_data.empty:
+        usage_counts = filtered_data['libelle_usage'].value_counts()
         diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
-        
-        hist_data = data['libelle_departement'].value_counts().reset_index()
+
+        hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
         hist_data.columns = ['dep', 'value']
         histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
-        
-        histo_img = histo_horiz(filter_cols if filter_cols else None, 
-                               filter_vals if filter_vals else None)
+
+        filter_cols = [k for k, v in filters.items() if v]
+        filter_vals = [int(v) if k == 'annee' else v for k, v in filters.items() if v]
+
+        histo_img = histo_horiz(filter_cols if filter_cols else None,
+                                filter_vals if filter_vals else None)
         volumes_usage_milieu = f'data:image/png;base64,{histo_img}' if histo_img else None
-        
     else:
         diagramme_circulaire = None
         histogrammehorizon = None
         volumes_usage_milieu = None
-    
+
     return render_template(
         'tab_usages.html',
         diagramme_circulaire=diagramme_circulaire,
@@ -183,14 +178,16 @@ def tab_usages():
         available_communes=data['nom_commune'].unique(),
         available_departements=data['libelle_departement'].unique(),
         available_ouvrages=data['nom_ouvrage'].unique(),
-        page_title="Tableau de bord", 
+        page_title="Tableau de bord",
         page_sub_title="Usages de l'eau",
         sub_header_template="dashboard.html"
     )
 
+
+
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
-# @cache.cached(timeout=300)
+@cache.cached(timeout=3600, query_string=True)
 def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
