@@ -1,13 +1,12 @@
-<!-- En tête secondaire -->
-<div class="sub-header">
-  <!-- Sous-titre de la page -->
-  <h1>{{ page_sub_title }}</h1>
-
-  <!-- Barre de navigation secondaire -->
+<div class="sub-header dashboard">
   <nav class="sub-navbar">
     <ul>
-      <li><a href="{{ url_for('a_propos_manuel') }}" class="active">Manuel d'utilisation</a></li>
-      <li><a href="{{ url_for('a_propos_equipe') }}" class="active">Notre équipe projet</a></li>
+      <li><a href="{{ url_for('a_propos_manuel') }}" class="{{ 'active' if request.path == url_for('a_propos_manuel') }}">Manuel d'utilisation
+          <i class="material-icons">menu_book</i>
+      </a></li>
+      <li><a href="{{ url_for('a_propos_equipe') }}" class="{{ 'active' if request.path == url_for('a_propos_equipe') }}">Notre équipe projet
+          <i class="material-icons">people</i>
+      </a></li>
     </ul>
   </nav>
 </div>
