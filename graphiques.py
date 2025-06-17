@@ -17,43 +17,35 @@ from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
 
 sns.set_theme(style='ticks')
 
-def histo_grouped(data, labels, categories, x_label, y_label, titre):
-    x = np.arange(len(labels))  # les positions des groupes
-    width = 0.8 / len(data)     # largeur des barres (adaptée selon le nombre de catégories)
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-
-    colors = ['cyan', 'deepskyblue', 'steelblue']
-    rects = []
-
-    for i in range(len(data)):
-        rect = ax.bar(x + (i - len(data)/2)*width + width/2, data[i], width, label=categories[i], color=colors[i % len(colors)])
-        rects.append(rect)
-
-    # Ajout des valeurs au-dessus des barres
-    for rect in rects:
-        for r in rect:
-            height = r.get_height()
-            ax.annotate(f'{height}',
-                        xy=(r.get_x() + r.get_width() / 2, height),
-                        xytext=(0, 3),
-                        textcoords="offset points",
-                        ha='center', va='bottom')
-
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_title(titre)
-    ax.set_xticks(x)
+def evo_graph(data):
+    """Génère le graphique des volumes par usage et milieu"""
+    grouped = data.groupby(['libelle_usage', 'milieu'])['volume'].sum().unstack()
+    
+    # Préparer les données pour histo_grouped
+    data_histo = [grouped[col].values for col in grouped.columns]
+    labels = grouped.index.tolist()
+    categories = grouped.columns.tolist()
+    
+    # Créer le graphique
+    x = np.arange(len(labels))
+    width = 0.35
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    for i, (col, values) in enumerate(zip(categories, data_histo)):
+        ax.bar(x + i*width, values, width, label=col)
+    
+    ax.set_xlabel("Usage")
+    ax.set_ylabel("Volume (m³)")
+    ax.set_title("Volume d'eau par usage et milieu")
+    ax.set_xticks(x + width/2)
     ax.set_xticklabels(labels)
-    ax.legend()
-
-    image_stream = BytesIO()
-    plt.savefig(image_stream, format='png', bbox_inches='tight')
-    plt.show()
+    ax.legend(title='Milieu')
+    
+    # Sauvegarder en image
+    buf = BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
     plt.close()
-
-    image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    return f'data:image/png;base64,{image_base64}'
+    return base64.b64encode(buf.getvalue()).decode('utf-8')
 
 def sns_pie(data: list, labels: list, titre: str):
     """
@@ -129,11 +121,6 @@ def evo(colonne: list = None, filtre: list = None):
         usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
     return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
-def evo():
-    usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
-    usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
-    return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
-
 def histo(colonne: list = None, filtre: list = None):
     if colonne and filtre:
         data_histo = chroniques.compte_dep(colonne, filtre)
@@ -160,7 +147,7 @@ def histo_horiz(colonne: list = None, filtre: list = None):
     titre = "Volumes par usage et par milieu"
     x_label = "Type de milieu"
     y_label = "Volume"
-    return histo_grouped(data_histo_2, labels,categories, x_label, y_label, titre)
+    return evo_graph(data_histo_2, labels,categories, x_label, y_label, titre)
 
 # diagramme_circu() # filtrage pas faisable
 # evo()

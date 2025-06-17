@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo, histo_horiz, sns_courbe_double
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, evo_graph
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -150,9 +150,7 @@ def tab_usages():
     else:
         filtered_data = data
 
-    # Generate graphs
     if not filtered_data.empty:
-        # Pie chart
         usage_counts = filtered_data['libelle_usage'].value_counts()
         diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
         
@@ -162,8 +160,10 @@ def tab_usages():
         histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
         
         # Volume par usage/environment
-        volumes_usage_milieu = f'data:image/png;base64,{histo_horiz()}'
-        
+        if 'milieu' in filtered_data.columns:
+            volumes_usage_milieu = f'data:image/png;base64,{evo_graph(filtered_data)}'
+        else:
+            volumes_usage_milieu = None 
     else:
         diagramme_circulaire = None
         histogrammehorizon = None
