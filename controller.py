@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz, evo
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -163,7 +163,6 @@ def tab_usages():
         hist_data.columns = ['dep', 'value']
         histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
         
-        # Corrected histo_horiz call
         histo_img = histo_horiz(filter_cols if filter_cols else None, 
                                filter_vals if filter_vals else None)
         volumes_usage_milieu = f'data:image/png;base64,{histo_img}' if histo_img else None
