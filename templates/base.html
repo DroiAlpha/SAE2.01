@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <!-- Enable browser caching for static assets -->
+  <meta http-equiv="Cache-Control" content="public, max-age=604800, immutable">
 </head>
 <body>
   {% include 'header.html' %}
@@ -31,6 +33,6 @@
 
   {% block content %}{% endblock %}
   {% include 'footer.html' %}
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>

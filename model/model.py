@@ -16,7 +16,11 @@ from sqlalchemy import create_engine
 #####################################################################
 
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
+<<<<<<< HEAD
 engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.18.132:5432/eaufrance")
+=======
+engine = create_engine("postgresql+psycopg2://yuri:yuri@10.10.5.50:5432/eaufrance")
+>>>>>>> c2f37c9aa061f2d35216bb96627bbd16a51c5769
 
 #####################################################################
 # FONCTIONS

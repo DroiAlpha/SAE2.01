@@ -1,69 +1,69 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<div class="dashboard-container">
+<div class="evolution-dashboard">
     <!-- Filtres -->
-    <div class="filter-sidebar">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
+    <div class="evolution-sidebar">
+        <div class="filter-card">
+            <div class="filter-header">
                 <h5>Filtres</h5>
             </div>
             <div class="card-body">
                 <form method="POST">
-                    <!-- Filtre Ouvrage -->
-                    <div class="mb-3">
-                        <label class="form-label">Nom de l'Ouvrage</label>
-                        <input type="text" name="nom_ouvrage" class="form-control" value="{{ nom_ouvrage }}">
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Ouvrages</label>
+                    <!-- Sélecteur ouvrage -->
+                    <div class="filter-group">
+                        <label class="form-label">Ouvrage</label>
                         <select name="available_ouvrages" class="form-select">
+                            <option value="">Tous les ouvrages</option>
                             {% for ouvrage in available_ouvrages %}
-                            <option value="{{ ouvrage }}">{{ ouvrage }}</option>
+                            <option value="{{ ouvrage }}" {% if ouvrage == nom_ouvrage %}selected{% endif %}>{{ ouvrage }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Filtre Année -->
-                    <div class="mb-3">
+                    <!-- Sélecteur année -->
+                    <div class="filter-group">
                         <label class="form-label">Année</label>
                         <select name="annee" class="form-select">
+                            <option value="">Toutes les années</option>
                             {% for year in years %}
                             <option value="{{ year }}">{{ year }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Comparaison Usages -->
-                    <div class="mb-3">
-                        <label class="form-label">Usage 1</label>
-                        <select name="usage_1" class="form-select">
-                            {% for usage in usages %}
-                            <option value="{{ usage }}">{{ usage }}</option>
+                    <!-- Sélecteur usage -->
+                    <div class="filter-group">
+                        <label class="form-label">Usage</label>
+                        <select name="usage" class="form-select">
+                            <option value="">Tous les usages</option>
+                            {% for u in usages %}
+                            <option value="{{ u }}">{{ u }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Appliquer</button>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-apply">Appliquer</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Graphique -->
-    <div class="graph-content">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-primary text-white">
-                <h5>Évolution Temporelle</h5>
+    <div class="evolution-graph-container">
+        <div class="evolution-graph-card">
+            <div class="evolution-graph-header">
+                <h5>Évolution temporelle</h5>
             </div>
-            <div class="card-body">
+            <div class="evolution-graph">
                 {% if graphique %}
-                <img src="{{ graphique }}" class="img-fluid" alt="Évolution des usages">
+                <img src="{{ graphique }}" class="img-fluid" alt="Graphique évolution temporelle">
                 {% else %}
                 <div class="alert alert-info">
-                    Sélectionnez un ouvrage pour afficher le graphique.
+                    Sélectionnez au moins un filtre pour afficher le graphique.
                 </div>
                 {% endif %}
             </div>

@@ -6,18 +6,17 @@ from io import BytesIO
 import base64
 import pandas as pd
 from random import *
-import folium as f
-from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from Model.chroniques import *
+from model.chroniques import milieu, cache_chroniques
 from io import BytesIO
 import base64
-from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
-
+from model.model import obtenir_info_ouvrage as db
+from model.cache import cache
 # -------------- HISTOGRAMME -------------------#
 
 sns.set_theme(style='ticks')
 
+@cache.memoize(timeout=3600)
 def histo_grouped(data, labels, categories, x_label, y_label, titre):
     x = np.arange(len(labels))  # les positions des groupes
     width = 0.8 / len(data)     # largeur des barres (adaptée selon le nombre de catégories)
@@ -50,10 +49,10 @@ def histo_grouped(data, labels, categories, x_label, y_label, titre):
 
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
+@cache.memoize(timeout=3600)
 def sns_pie(data: list, labels: list, titre: str):
     """
     C'est le diagramme circulaire
@@ -63,10 +62,10 @@ def sns_pie(data: list, labels: list, titre: str):
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
+@cache.memoize(timeout=3600)
 def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_label: str, y_label: str, label1="Courbe 1", label2="Courbe 2"):
     df1 = pd.DataFrame({'x': x_values, 'y': data1, 'serie': label1})
     df2 = pd.DataFrame({'x': x_values, 'y': data2, 'serie': label2})
@@ -77,11 +76,10 @@ def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_la
     plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
+@cache.memoize(timeout=3600)
 def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: str):
     df = pd.DataFrame({'x': x_values, 'y': data})
     sns.relplot(data=df, kind="line", x="x", y="y")
@@ -90,11 +88,10 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
+@cache.memoize(timeout=3600)
 def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y_label: str, titre: str):
     f, ax = plt.subplots(figsize=(14, 10))
     sns.barplot(x=value, y=category, data=data, ax=ax)
@@ -103,20 +100,21 @@ def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
-chroniques = Chroniques()
-
+@cache.memoize(timeout=3600)
 def diagramme_circu(colonne: list = None, filtre: list = None):
+    chroniques, data = cache_chroniques()
     if colonne and filtre:
         data_usages = chroniques.usage2(colonne, filtre)
     else:
         data_usages = chroniques.usage2()
     return sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
 
+@cache.memoize(timeout=3600)
 def evo(colonne: list = None, filtre: list = None):
+    chroniques, data = cache_chroniques()
     if colonne and filtre:
         usage_1 = chroniques.data_evo(chroniques.usage()[0], 1, colonne, filtre)
         usage_2 = chroniques.data_evo(chroniques.usage()[1], 1, colonne, filtre)
@@ -125,7 +123,9 @@ def evo(colonne: list = None, filtre: list = None):
         usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
     return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
+@cache.memoize(timeout=3600)
 def histo(colonne: list = None, filtre: list = None):
+    chroniques, data = cache_chroniques()
     if colonne and filtre:
         data_histo = chroniques.compte_dep(colonne, filtre)
         titre = "Histogramme du nombre d'ouvrage par département"
@@ -138,7 +138,9 @@ def histo(colonne: list = None, filtre: list = None):
         y_label = " "
     return sns_horizontalbarplot(data_histo, 'dep', 'value', x_label, y_label, titre)
 
+@cache.memoize(timeout=3600)
 def histo_horiz(colonne: list = None, filtre: list = None):
+    chroniques, data = cache_chroniques()
     data_histo_2 = []
     for c in chroniques.usage():
         if colonne and filtre:
