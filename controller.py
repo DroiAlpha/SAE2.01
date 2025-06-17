@@ -11,11 +11,9 @@ Contrôleur de l'application Flask pour le site web sur les prélèvements d'eau
 from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
-import time
 from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz, evo
-import Model.model as db
-from Model.chroniques import *
-import folium
+import model.model as db
+from model.chroniques import *
 from flask import jsonify
 import threading
 
@@ -29,15 +27,11 @@ app = Flask(__name__)
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '10.10.9.48'
+app.config['CACHE_REDIS_HOST'] = '10.10.3.132'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
-# Utilisation du cache simple pour le développement local
-app.config['CACHE_TYPE'] = 'SimpleCache'
-
 cache = Cache(app)
-
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
 
@@ -46,10 +40,22 @@ matplotlib.use('Agg')
 #####################################################################
 # ROUTES
 #####################################################################
+@cache.cached(key_prefix='donnees_chroniques', timeout=86400) # Cache pendant 24 hours
+def cache_chroniques():
+    """
+    Fonction pour charger les données des chroniques depuis l'API Hubeau
+    et les mettre en cache.
+    """
+    chroniques_instance = Chroniques()
+    data_list = chroniques_instance.donnees() # Appelle l'API Hubeau pour récupérer les données
+    data_df = pd.DataFrame(data_list)
+    return chroniques_instance, data_df
+
 with app.app_context():
-    def startup():
-        thread = threading.Thread()
-        thread.start()
+    cache_chroniques()  # Charge les données des chroniques au démarrage de l'application  
+    thread = threading.Thread()
+    thread.start()
+    
 ################################
 # ACCUEIL
 ################################
@@ -121,11 +127,10 @@ def get_map_data():
     })
     
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
-@app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
+@app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'],)
 @cache.cached(timeout=10)
 def tab_usages():
-    chroniques = Chroniques()
-    data = pd.DataFrame(chroniques.donnees())
+    chroniques, data = cache_chroniques()
 
     filters = {
         "annee": request.form.get("annee"),
@@ -137,6 +142,8 @@ def tab_usages():
 
     filtered_data = data.copy()
     if filters:
+        cache.clear()  # Vide le cache pour les nouveaux filtres
+        cache.set('filters', filters)  # Stocke les filtres dans le cache
         if filters.get("annee"):
             filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
         if filters.get("libelle_usage"):
@@ -187,7 +194,7 @@ def tab_usages():
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
-@cache.cached(timeout=3600, query_string=True)
+@cache.cached(timeout=10, query_string=True)
 def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
@@ -195,8 +202,7 @@ def tab_evolution():
     Chaque ouvrage est représenté par une courbe, et l'utilisateur peut choisir l'ouvrage à afficher
     """
 
-    chroniques = Chroniques()
-    data = pd.DataFrame(chroniques.donnees())
+    chroniques, data = cache_chroniques()
     available_ouvrages=data['nom_ouvrage'].unique()
     graphique = evo()
     nom_ouvrage = 'AUDELONCOURT'

@@ -6,13 +6,11 @@ from io import BytesIO
 import base64
 import pandas as pd
 from random import *
-import folium as f
-from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from Model.chroniques import *
+from model.chroniques import *
 from io import BytesIO
 import base64
-from Model.model import obtenir_info_ouvrage as db
+from model.model import obtenir_info_ouvrage as db
 
 # -------------- HISTOGRAMME -------------------#
 
@@ -50,7 +48,6 @@ def histo_grouped(data, labels, categories, x_label, y_label, titre):
 
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
@@ -63,7 +60,6 @@ def sns_pie(data: list, labels: list, titre: str):
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
@@ -77,8 +73,6 @@ def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_la
     plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
@@ -90,8 +84,6 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     plt.ylabel(y_label)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
@@ -103,7 +95,6 @@ def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return image_base64
 
