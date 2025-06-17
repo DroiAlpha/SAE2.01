@@ -626,3 +626,244 @@ footer {
     background: linear-gradient(to right, #B0E0E6, #40E0D0);
     text-align: center;
 }
+/* ============================================= */
+/* ==       STYLE POUR LA PAGE À PROPOS       == */
+/* ============================================= */
+
+/* --- Sous-navigation --- */
+.sub-nav {
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 3px solid #9b59b6; /* Couleur violette de la bordure */
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.sub-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 2rem; /* Espace entre les liens */
+}
+
+.sub-nav ul li a {
+  display: block;
+  padding: 0.8rem 1.5rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+/* Style du lien actif */
+.sub-nav ul li a.active {
+  background-color: #9cf2f2; /* Couleur cyan/turquoise du fond */
+  color: #005a5a;
+}
+
+/* --- Contenu principal de la page --- */
+.container.page-manuel {
+  padding: 2rem 5%; /* Marge sur les côtés */
+  max-width: 1200px;
+  margin: 0 auto; /* Centrer le conteneur */
+}
+
+.main-title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 3rem; /* Espace entre les deux colonnes */
+  align-items: flex-start;
+}
+
+/* Colonne de gauche (texte) */
+.text-content {
+  flex: 1; /* Prend la moitié de l'espace disponible */
+  background-color: #2a7ab0; /* Bleu de la boîte */
+  color: #fff;
+  padding: 2rem;
+  border-radius: 15px;
+}
+
+.text-content ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.text-content ul li {
+  margin-bottom: 1.2rem;
+  line-height: 1.5;
+}
+
+.text-content ul li::before {
+  content: '•';
+  color: #9cf2f2; /* Couleur des puces */
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+.text-content ul ul {
+  list-style: none;
+  padding-left: 2rem; /* Indentation pour la sous-liste */
+  margin-top: 0.8rem;
+}
+
+.text-content ul ul li::before {
+  content: '○'; /* Puce différente pour la sous-liste */
+  color: #fff;
+}
+
+
+/* Colonne de droite (image) */
+.image-content {
+  flex: 1; /* Prend l'autre moitié de l'espace */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.image-content img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.image-content .caption {
+  background-color: #eaf6ff; /* Fond bleu très clair pour la légende */
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  color: #333;
+  width: 100%;
+  max-width: 450px; /* Limite la largeur de la légende */
+}
+
+.image-content .caption p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- Rendre la page responsive pour les petits écrans --- */
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column; /* Les colonnes passent l'une en dessous de l'autre */
+  }
+}
+
+@media (max-width: 768px) {
+    .sub-nav ul {
+        gap: 0.5rem;
+    }
+    .sub-nav ul li a {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    .container.page-manuel {
+        padding: 1.5rem 3%;
+    }
+}
+/* ============================================= */
+/* == STYLE POUR LA PAGE NOTRE ÉQUIPE PROJET  == */
+/* ============================================= */
+
+/* --- Conteneur général de la section équipe --- */
+.team-container {
+  padding: 3rem 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Grille des membres --- */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 2.5rem;
+}
+
+/* --- Style de la carte membre --- */
+.team-member {
+  background-color: #ffffff;
+  border: 3px solid #2a7ab0;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 20px -5px rgba(156, 242, 242, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.team-member::before {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  left: 35%;
+  width: 25%;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+}
+
+.member-card-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* --- Style du CERCLE pour la photo --- */
+.member-icon {
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  background-color: #2a7ab0; /* Couleur de fond si l'image ne charge pas */
+  border: 4px solid #9cf2f2;
+  border-radius: 50%; /* Rend le conteneur parfaitement rond */
+  overflow: hidden; /* Cache les coins de l'image qui dépassent du cercle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- NOUVEAU : Style pour l'IMAGE à l'intérieur du cercle --- */
+.member-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Assure que l'image remplit le cercle sans être déformée */
+}
+
+/* --- Informations (Nom et citation) --- */
+.member-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1a4a6b;
+  font-size: 1.25rem;
+}
+
+.member-info p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+  .team-container {
+    padding: 2rem 5%;
+  }
+}
