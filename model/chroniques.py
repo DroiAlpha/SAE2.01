@@ -160,15 +160,22 @@ ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1
 
 donnees = chroniques.donnees()
 
-def milieu(usage):
+def milieu(usage, colonne: list = None, filtre: list = None):
     volumes_par_ouvrage = {}
-
-    for c in donnees:
-        if 'volume' in c and c.get('libelle_usage') == usage:
-            code = c['code_ouvrage']
-            if code not in volumes_par_ouvrage:
-                volumes_par_ouvrage[code] = []
-            volumes_par_ouvrage[code].append(c['volume'])
+    if colonne and filtre:
+        for c in chroniques.filtre_ulti(colonne, filtre):
+            if 'volume' in c and c.get('libelle_usage') == usage:
+                code = c['code_ouvrage']
+                if code not in volumes_par_ouvrage:
+                    volumes_par_ouvrage[code] = []
+                volumes_par_ouvrage[code].append(c['volume'])
+    else:
+        for c in chroniques.filtre_ulti():
+            if 'volume' in c and c.get('libelle_usage') == usage:
+                code = c['code_ouvrage']
+                if code not in volumes_par_ouvrage:
+                    volumes_par_ouvrage[code] = []
+                volumes_par_ouvrage[code].append(c['volume'])
 
     somme_sout = 0
     for code in ouvrages_sout:

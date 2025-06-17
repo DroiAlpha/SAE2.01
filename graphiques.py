@@ -97,7 +97,7 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     return f'data:image/png;base64,{image_base64}'
 
 def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y_label: str, titre: str):
-    f, ax = plt.subplots(figsize=(22, 14))
+    f, ax = plt.subplots(figsize=(14, 10))
     sns.barplot(x=value, y=category, data=data, ax=ax)
     ax.set(xlim=(0, data[value].max() * 1.1), ylabel=y_label, xlabel=x_label) 
     sns.despine(left=True, bottom=True)
@@ -113,26 +113,47 @@ def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y
 
 chroniques = Chroniques()
 
-def diagramme_circu():
-    data_usages = chroniques.usage2()
+def diagramme_circu(colonne: list = None, filtre: list = None):
+    if colonne and filtre:
+        data_usages = chroniques.usage2(colonne, filtre)
+    else:
+        data_usages = chroniques.usage2()
     return sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
+
+def evo(colonne: list = None, filtre: list = None):
+    if colonne and filtre:
+        usage_1 = chroniques.data_evo(chroniques.usage()[0], 1, colonne, filtre)
+        usage_2 = chroniques.data_evo(chroniques.usage()[1], 1, colonne, filtre)
+    else:
+        usage_1 = chroniques.data_evo(chroniques.usage()[0], 1)
+        usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+    return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
 def evo():
     usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
     usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
     return sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
 
-def histo():
-    data_histo = chroniques.compte_dep()
-    titre = "Histogramme du nombre d'ouvrage par département"
-    x_label = "Nombre d'ouvrages"
-    y_label = " "
+def histo(colonne: list = None, filtre: list = None):
+    if colonne and filtre:
+        data_histo = chroniques.compte_dep(colonne, filtre)
+        titre = "Histogramme du nombre d'ouvrage par département"
+        x_label = "Nombre d'ouvrages"
+        y_label = " "
+    else:
+        data_histo = chroniques.compte_dep()
+        titre = "Histogramme du nombre d'ouvrage par département"
+        x_label = "Nombre d'ouvrages"
+        y_label = " "
     return sns_horizontalbarplot(data_histo, 'dep', 'value', x_label, y_label, titre)
 
-def histo_horiz():
+def histo_horiz(colonne: list = None, filtre: list = None):
     data_histo_2 = []
     for c in chroniques.usage():
-        data_histo_2.append(milieu(c))
+        if colonne and filtre:
+            data_histo_2.append(milieu(c, colonne, filtre))
+        else:
+            data_histo_2.append(milieu(c))
 
     labels = ["SOUT", "CONT"]
     categories = ["EAU POTABLE", "INDUSTRIE"]
