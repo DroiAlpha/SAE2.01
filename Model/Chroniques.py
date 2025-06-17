@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+import Model.model as db
+
 class Chroniques:
     def __init__(self):
         self.url = "https://hubeau.eaufrance.fr/api/v1/prelevements/chroniques"
@@ -16,13 +18,11 @@ class Chroniques:
         (GROS) Probleme : Ya pas une donnée avec true comme prelevement_ecrasant
         """
         L = []
-        #c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]) and c['prelevement_ecrasant']
         for c in self.acces_chroniques():
             if c['code_qualification_volume'] == "1" and (c['code_statut_volume'] in ["1", "2"]):
                 L.append(c)
         return L
-
-
+    
     def colonnes(self):
         L = []
         for i in self.acces_chroniques()[0]:
@@ -42,7 +42,7 @@ class Chroniques:
                     L.append(c)
             else:
                 L.append(c)
-        return pd.DataFrame(L)
+        return L
     
     def filtre_ouv(self, nom_ouvrage):
         """
@@ -57,21 +57,33 @@ class Chroniques:
                     "volume": c['volume']
                 })
         return result
-
     
-    def annee(self, colonne, filtre):
+    def annee(self):
         chroniques = self.donnees()
+        colonne = 'code_ouvrage'
+        filtre = 'OPR0000000102'
         L = []
         for c in chroniques:
             if c[colonne] == filtre:
                 L.append(c['annee'])
         return L
     
-    def min_annee(self, colonne, filtre):
-        return str(min(self.annee(colonne, filtre)))
+    def data_evo(self, usage, exp: int): # FILTARGE FAISABLE
+        annees = self.annee()  # c une liste
+        L = []
+        for annee in annees:
+            temp = 0
+            for d in self.filtre():
+                if d['annee'] == annee and d['libelle_usage'] == usage:
+                    temp += d['volume']
+            L.append(temp * exp)
+        return L
+
+    def min_annee(self):
+        return str(min(self.annee()))
     
-    def max_annee(self, colonne, filtre):
-        return str(max(self.annee(colonne, filtre)))
+    def max_annee(self):
+        return str(max(self.annee()))
     
     def nom_ouvrage(self, ouvrage):
         for c in self.donnees():
@@ -86,13 +98,67 @@ class Chroniques:
         return L
 
     def usage(self):
-        e = set()
-        for c in self.acces_chroniques():
-            e.add(c['libelle_usage'])
-        return list(e)
+        return ['EAU POTABLE', 'INDUSTRIE et ACTIVITES ECONOMIQUES (hors irrigation, hors énergie)']
     
+    def usage2(self): # FILTRAGE FAISABLE
+        L = []
+        for usage in self.usage():
+            i = 0
+            for elt in self.filtre():
+                if elt['libelle_usage'] == usage:
+                    i += 1
+            L.append(i)
+        return L
+    
+    def compte_dep(self): # FILTRAGE FAISABLE
+        dic = {}
+        chroniques = self.filtre()
+        for c in chroniques:
+            if c['code_departement'] not in dic:
+                dic[c['code_departement']] = 1
+            else :
+                dic[c['code_departement']] += 1
+        
+        retour = [{"dep": dep, "value": count} for dep, count in dic.items()]
+        return retour
+    
+    def milieux(self):
+        ouvrages = db.obtenir_info_ouvrage()
+        L = []
+        for i in ouvrages['code_type_milieu']:
+            if i not in L:
+                L.append(i)
+        return L
+
 # ------------- TEST ----------------------#
 
 chroniques = Chroniques()
 
-print(chroniques.filtre())
+ouvrages = db.obtenir_info_ouvrage()
+
+ouvrages_sout = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[0]]['code_ouvrage'].tolist()
+ouvrages_autre = ouvrages[ouvrages['code_type_milieu'] == chroniques.milieux()[1]]['code_ouvrage'].tolist()
+
+donnees = chroniques.donnees()
+
+def milieu(usage):
+    volumes_par_ouvrage = {}
+
+    for c in donnees:
+        if 'volume' in c and c.get('libelle_usage') == usage:
+            code = c['code_ouvrage']
+            if code not in volumes_par_ouvrage:
+                volumes_par_ouvrage[code] = []
+            volumes_par_ouvrage[code].append(c['volume'])
+
+    somme_sout = 0
+    for code in ouvrages_sout:
+        volumes = volumes_par_ouvrage.get(code, [])
+        somme_sout += sum(volumes)
+
+    somme_autre = 0
+    for code in ouvrages_autre:
+        volumes = volumes_par_ouvrage.get(code, [])
+        somme_autre += sum(volumes)
+
+    return [somme_sout, somme_autre]
