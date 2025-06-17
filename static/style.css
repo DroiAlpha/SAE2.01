@@ -1,40 +1,192 @@
-/* Style CSS du site Web */
+/******************************************** 
+Style CSS du site Web 
+*********************************************/
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    color: #FFF;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/********************************************/
+/* Header */
+/********************************************/
 
 header {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 70px;
+    background: linear-gradient(90deg, #2ec4e6 0%, #1a8bb8 100%);
+    /* background: linear-gradient(to right, #B0E0E6, #40E0D0); */
 }
-    
 
-.div2 {
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.img-logo {
+    width: 3%;
+    height: auto;
+}
+
+.txt-logo {
+    font-size: 2rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+    color: #fff;
+}
+
+h1 {
+    flex: 1;
+    text-align: center;
+    font-size: 2rem;
+    color: #fff;
+    margin: 0;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.2rem;
+    cursor: pointer;
+}
+
+/* Masquer le menu par défaut sur mobile */
+.menu-items {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 2rem;
+    background: #2196f3;
+    color: #fff;
+    border-radius: 0 0 1rem 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 200px;
+    z-index: 1000;
+    padding: 1rem 0;}
+
+/* Afficher le menu quand la classe show est présente */
+.menu-items.show {
+  display: block;
+  background-color: #1a8bb8;
+}
+
+.menu-items a {
+    display: block;
+    padding: 0.75rem 2rem;
+    color: #fff;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.menu-items a:hover {
+    background: #1976d2;
+}
+
+/********************************************/
+/* Sous-header */
+/********************************************/
+
+.sub-header {
+    grid-column: span 8 / span 8;
+    grid-row: span 1 / span 1;
+    background: linear-gradient(to right, #B0E0E6, #40E0D0);
+}
+
+/********************************************/
+/* Accueil */
+/********************************************/
+
+.home {
+    flex: 1 0 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../static/bkgd.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+.home-logo {
     grid-column: span 4 / span 4;
-}
-
-.div3 {
-    grid-column-start: 6;
-}
-
-.div4 {
-    grid-column: span 2 / span 2;
+    grid-row: span 2 / span 2;
     grid-column-start: 3;
-    grid-row-start: 3;
+    grid-row-start: 4;
 }
 
-.div5 {
-    grid-column: span 4 / span 4;
-    grid-column-start: 2;
-    grid-row-start: 5;
+.img-home-logo {
+    width: 10%;
+    height: auto;
 }
 
-.div6 {
-    grid-column: span 2 / span 2;
-    grid-column-start: 3;
-    grid-row-start: 6;
-}
-
-.div7 {
+.welcome-h2 {
     grid-column: span 6 / span 6;
-    grid-row-start: 8;
+    grid-row: span 2 / span 2;
+    grid-column-start: 2;
+    grid-row-start: 7;
+}
+
+.btn-dashboard {
+    grid-column: span 2 / span 2;
+    grid-column-start: 4;
+    grid-row-start: 10;
+}
+
+/********************************************/
+/* Tableau de bord */
+/********************************************/
+
+.filter-arrow {
+    transition: transform 0.3s;
+    vertical-align: middle;
+}
+
+.filter-arrow.rotated {
+    transform: rotate(180deg);
+}
+
+/********************************************/
+/* Jeux de données */
+/********************************************/
+
+
+/********************************************/
+/* À propos */
+/********************************************/
+
+
+/********************************************/
+/* Footer */
+/********************************************/
+
+footer {
+    grid-column: span 8 / span 8;
+    grid-row-start: 12;
+    background: linear-gradient(to right, #B0E0E6, #40E0D0);
 }

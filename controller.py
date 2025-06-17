@@ -79,7 +79,8 @@ def tab_carte():
     """
     return render_template(
         'tab_carte.html', 
-        page_title="Tableau de bord"
+        page_title="Tableau de bord", 
+        page_sub_title="Carte des prélèvements"
     )
 
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
@@ -124,7 +125,8 @@ def tab_usages():
             diagramme_circulaire=diagramme_circulaire,
             histogramme=histogramme,
             filters=filters, 
-            page_title="Tableau de bord"
+            page_title="Tableau de bord", 
+            page_sub_title="Usages de l'eau"
         )
 
     # Si GET ou aucun filtre
@@ -136,7 +138,8 @@ def tab_usages():
         diagramme_circulaire=diagramme_circulaire,
         histogramme=histogramme,
         filters=None, 
-        page_title="Tableau de bord"
+        page_title="Tableau de bord", 
+        page_sub_title="Usages de l'eau"
     )
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
@@ -168,7 +171,8 @@ def tab_evolution():
         'tab_evolution.html',
         graphique=graphique,
         nom_ouvrage=nom_ouvrage, 
-        page_title="Tableau de bord"
+        page_title="Tableau de bord", 
+        page_sub_title="Évolution temporelle"
     )
 
 ################################
@@ -188,7 +192,11 @@ def jeu_chroniques():
         form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
     )
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template('jeu_chroniques.html', page_title="Jeux de données")
+    return render_template(
+        'jeu_chroniques.html', 
+        page_title="Jeux de données", 
+        page_sub_title="Chroniques"
+    )
 
 # Route pour la page du jeu de données pour les points de prélèvement "jeu_points_prelevement.html"
 @app.route('/jeux-donnees/points-prelevement')
@@ -203,7 +211,11 @@ def jeu_points_prelevement():
         form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
     )
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template('jeu_points_prelevement.html', page_title="Jeux de données")
+    return render_template(
+        'jeu_points_prelevement.html', 
+        page_title="Jeux de données", 
+        page_sub_title="Points de prélèvement"
+    )
 
 # Route pour la page du jeu de données pour les ouvrages "jeu_ouvrages.html"
 @app.route('/jeux-donnees/ouvrages')
@@ -218,7 +230,11 @@ def jeu_ouvrages():
         form_keys=["annee", "libelle_usage", "nom_commune", "libelle_departement", "nom_ouvrage"]
     )
     # Fonction générique de transmission des valeurs filtrées d'un tableau
-    return render_template('jeu_ouvrages.html', page_title="Jeux de données")
+    return render_template(
+        'jeu_ouvrages.html', 
+        page_title="Jeux de données", 
+        page_sub_title="Ouvrages"
+    )
 
 def render_filtered_template(template, filter_fct, form_keys):
     """
@@ -255,7 +271,11 @@ def a_propos_manuel():
     Cette page fournit des informations sur l'utilisation de l'application, les fonctionnalités disponibles et comment naviguer dans le site
     """
     # Affichage du template
-    return render_template('a_propos_manuel.html', page_title="À propos")
+    return render_template(
+        'a_propos_manuel.html', 
+        page_title="À propos",
+        page_sub_title="Manuel d'utilisation"
+    )
 
 # Route pour la page d'à propos sur l'équipe projet "a_propos_equipe.html"
 @app.route('/a-propos/notre-equipe-projet')
@@ -265,7 +285,11 @@ def a_propos_equipe():
     Cette page présente l'équipe projet, ses membres et leurs rôles dans le développement de l'application
     """
     # Affichage du template
-    return render_template('a_propos_equipe.html', page_title="À propos")
+    return render_template(
+        'a_propos_equipe.html', 
+        page_title="À propos", 
+        page_sub_title="Notre équipe projet"
+    )
 
 ################################
 # LANCEMENT DE L'APPLICATION

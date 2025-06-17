@@ -2,8 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Prélèv’eau</title>
+  <title>{{ page_title }} | Prélèv’eau</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
   <!-- En-tête principal -->
@@ -12,5 +14,6 @@
   {% block content %}{% endblock %}
   <!-- Pied de page -->
   {% include 'footer.html' %}
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

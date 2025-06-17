@@ -6,7 +6,10 @@
 - Fichier de sauvegarde de la carte Folium mis à jour automtiquement à cahque lancement de l'application -> Impossibilité d'ajouter une structure HTML et un style CSS pour formater cette page
 
 # Modifications apportées
-- Uniformisation de la documentation (commentaires et docstring) dans chaque fichier 
+- Uniformisation de la documentation (commentaires et docstring) dans chaque fichier
+- Sturcturation des pages HTML
+- Ajout d'un style CSS pour l'apparance du site
+- Ajout d'un script JS pour les interactions utilisateurs (menu et filtres)
 
 ## Comment on va procéder pour la SAE 2.01 ?
   - On utilise une architecture MVC (Modèle-Vue-Contrôleur)
