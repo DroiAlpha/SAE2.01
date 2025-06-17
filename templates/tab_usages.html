@@ -1,7 +1,169 @@
-<!-- Structure commune -->
 {% extends 'base.html' %}
-<!-- Contenu de la page Usages de l'eau -->
+
 {% block content %}
-<!-- En-tête secondaire -->
-{% include 'tab_sub-header.html' %}
+
+<div class="dashboard-wrapper">
+    <!-- Filtre Sidebar -->
+    <div class="filter-sidebar">
+        <div class="filter-card">
+            <div class="filter-header">
+                <h3>Filtres</h3>
+            </div>
+            <div class="filter-body">
+                <form method="POST" action="{{ url_for('tab_usages') }}">
+                    <!-- Annee Filtre -->
+                    <div class="filter-group">
+                        <label for="annee">Année</label>
+                        <select id="annee" name="annee">
+                            <option value="">Toutes les années</option>
+                            {% for year in available_years %}
+                                <option value="{{ year }}" {% if filters and filters.annee == year|string %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Usage Filtre -->
+                    <div class="filter-group">
+                        <label for="libelle_usage">Usage</label>
+                        <select id="libelle_usage" name="libelle_usage">
+                            <option value="">Tous les usages</option>
+                            {% for usage in available_usages %}
+                                <option value="{{ usage }}" {% if filters and filters.libelle_usage == usage %}selected{% endif %}>{{ usage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Department Filtre -->
+                    <div class="filter-group">
+                        <label for="libelle_departement">Département</label>
+                        <select id="libelle_departement" name="libelle_departement">
+                            <option value="">Tous les départements</option>
+                            {% for dept in available_departements %}
+                                <option value="{{ dept }}" {% if filters and filters.libelle_departement == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Commune Filtre -->
+                    <div class="filter-group">
+                        <label for="nom_commune">Commune</label>
+                        <select id="nom_commune" name="nom_commune">
+                            <option value="">Toutes les communes</option>
+                            {% for commune in available_communes %}
+                                <option value="{{ commune }}" {% if filters and filters.nom_commune == commune %}selected{% endif %}>{{ commune }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- ouvrage Filtre -->
+                    <div class="filter-group">
+                        <label for="nom_ouvrage">Ouvrage</label>
+                        <select id="nom_ouvrage" name="nom_ouvrage">
+                            <option value="">Tous les ouvrages</option>
+                            {% for ouvrage in available_ouvrages %}
+                                <option value="{{ ouvrage }}" {% if filters and filters.nom_ouvrage == ouvrage %}selected{% endif %}>{{ ouvrage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-apply">Appliquer</button>
+                        <a href="{{ url_for('tab_usages') }}" class="btn-reset">Réinitialiser</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphs Content -->
+    <div class="graphs-content">
+        <!-- graphe diagramme_circulaire -->
+        <div class="graph-card">
+            <div class="graph-header">
+                Répartition des usages
+            </div>
+            <div class="graph-container">
+                {% if diagramme_circulaire %}
+                    <img src="{{ diagramme_circulaire }}" alt="Diagramme des usages">
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Horizontal Bar Chart -->
+        <div class="graph-card">
+            <div class="graph-header">
+                Ouvrages par département
+            </div>
+            <div class="graph-container">
+                {% if histogramme %}
+                    <img src="{{ histogramme }}" alt="Histogramme par département">
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Evolution Chart -->
+        <div class="graph-card">
+            <div class="graph-header">
+                Évolution des volumes
+            </div>
+            <div class="graph-container">
+                {% if evolution_graph %}
+                    <img src="{{ evolution_graph }}" alt="Évolution des volumes">
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Grouped Bar Chart -->
+        <div class="graph-card">
+            <div class="graph-header">
+                Volumes par usage/milieu
+            </div>
+            <div class="graph-container">
+                {% if histogramme_horizontal %}
+                    <img src="{{ histogramme_horizontal }}" alt="Volumes par usage">
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deptSelect = document.getElementById('libelle_departement');
+        const communeSelect = document.getElementById('nom_commune');
+        
+        if (deptSelect && communeSelect) {
+            deptSelect.addEventListener('change', function() {
+                if (this.value) {
+                    communeSelect.disabled = true;
+                    communeSelect.value = '';
+                } else {
+                    communeSelect.disabled = false;
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

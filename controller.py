@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import map_prelevement, heatmap, sns_horizontalbarplot, sns_pie, sns_courbe
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -125,61 +125,62 @@ def get_map_data():
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
 def tab_usages():
-    """
-    Fonction de définition de l'adresse de la page des graphiques sur les usages de l'eau "tab_usages.html"
-    Affiche les graphiques (histogrammes groupés, diagramme en barres empilées et diagramme circulaire) sur les usages de l'eau, avec ou sans filtres
-    """
     chroniques = Chroniques()
+    data = pd.DataFrame(chroniques.donnees())  # Convertir en DataFrame paske amaury est goofy mdr
     
-    # Données par défaut (non filtrées)
-    donnees = chroniques.donnees()  
-    
-    if request.method == 'POST':
-        # Récupération des filtres depuis le formulaire
-        filters = {
-            "annee": request.form.get("annee"),
-            "libelle_usage": request.form.get("libelle_usage"),
-            "nom_commune": request.form.get("nom_commune"),
-            "libelle_departement": request.form.get("libelle_departement"),
-            "nom_ouvrage": request.form.get("nom_ouvrage")
-        }
+    filters = {
+        "annee": request.form.get("annee"),
+        "libelle_usage": request.form.get("libelle_usage"),
+        "nom_commune": request.form.get("nom_commune"),
+        "libelle_departement": request.form.get("libelle_departement"),
+        "nom_ouvrage": request.form.get("nom_ouvrage")
+    } if request.method == 'POST' else None
 
-        # Filtrage des données manuellement
-        filtered_data = []
+    #  Filtrer les données en fonction des filtres sélectionnés
+    if filters:
+        filtered_data = data.copy()
+        if filters["annee"]:
+            filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
+        if filters["libelle_usage"]:
+            filtered_data = filtered_data[filtered_data['libelle_usage'] == filters["libelle_usage"]]
+        if filters["nom_commune"]:
+            filtered_data = filtered_data[filtered_data['nom_commune'] == filters["nom_commune"]]
+        if filters["libelle_departement"]:
+            filtered_data = filtered_data[filtered_data['libelle_departement'] == filters["libelle_departement"]]
+        if filters["nom_ouvrage"]:
+            filtered_data = filtered_data[filtered_data['nom_ouvrage'] == filters["nom_ouvrage"]]
+    else:
+        filtered_data = data
+
+    # Si des données sont filtrées, créer les graphiques
+    if not filtered_data.empty:
+        # Diagramme circulaire
+        usage_counts = filtered_data['libelle_usage'].value_counts()
+        diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
         
-        for c in donnees:
-            if (not filters["annee"] or str(c["annee"]) == filters["annee"]) and \
-               (not filters["libelle_usage"] or c["libelle_usage"] == filters["libelle_usage"]) and \
-               (not filters["nom_commune"] or c["nom_commune"] == filters["nom_commune"]) and \
-               (not filters["libelle_departement"] or c["libelle_departement"] == filters["libelle_departement"]) and \
-               (not filters["nom_ouvrage"] or c["nom_ouvrage"] == filters["nom_ouvrage"]):
-                filtered_data.append(c)
-
-        # Génération des graphiques à partir des données filtrées
-        diagramme_circulaire = sns_pie(filtered_data)
-        histogramme = sns_horizontalbarplot(filtered_data)
-
-        return render_template(
-            'tab_usages.html',
-            diagramme_circulaire=diagramme_circulaire,
-            histogramme=histogramme,
-            filters=filters, 
-            page_title="Tableau de bord", 
-            page_sub_title="Usages de l'eau"
-        )
-
-    # Si GET ou aucun filtre
-    diagramme_circulaire = sns_pie(donnees)
-    histogramme = sns_horizontalbarplot(donnees)
+        # Bar horizontal
+        hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
+        hist_data.columns = ['dep', 'value']
+        histogramme = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre ouvrages", "Départements", "Nombre ouvrages par département")}'
+    else:
+        diagramme_circulaire = None
+        histogramme = None
     
     return render_template(
         'tab_usages.html',
         diagramme_circulaire=diagramme_circulaire,
         histogramme=histogramme,
-        filters=None, 
+        filters=filters,
+        available_years=sorted(data['annee'].unique()),
+        available_usages=data['libelle_usage'].unique(),
+        available_communes=data['nom_commune'].unique(),
+        available_departements=data['libelle_departement'].unique(),
+        available_ouvrages=data['nom_ouvrage'].unique(),
         page_title="Tableau de bord", 
-        page_sub_title="Usages de l'eau"
+        page_sub_title="Usages de l'eau",
+        sub_header_template="dashboard.html"
     )
+
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])

@@ -232,6 +232,47 @@ h1 {
     background-color: rgba(0, 0, 0, 0.15);
 }
 
+.filter-form {
+  background: #f5f5f5;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.filter-group select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.filter-form button[type="submit"] {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reset-btn {
+  color: #2196F3;
+  text-align: center;
+  padding: 0.5rem;
+}
 
 /********************************************/
 /* Carte */
@@ -282,6 +323,210 @@ h1 {
     border-color: #1976D2;
 }
 
+/********************************************/
+/* Graphes */
+/********************************************/
+
+.dashboard-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    background: #f5f7fa;
+    padding-bottom: 2rem; 
+}
+
+
+.filter-sidebar {
+    width: 300px;
+    padding: 20px;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    position: relative;
+    height: auto;
+    overflow: visible;
+}
+
+.filter-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.filter-header {
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #2ec4e6 0%, #1a8bb8 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    font-weight: 500;
+}
+
+.filter-body {
+    padding: 20px;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
+    transition: all 0.3s;
+}
+
+.filter-group select:focus {
+    border-color: #2ec4e6;
+    box-shadow: 0 0 0 3px rgba(46, 196, 230, 0.2);
+    outline: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.filter-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-apply {
+    background: #2ec4e6;
+    color: white;
+}
+
+.btn-apply:hover {
+    background: #1a8bb8;
+}
+
+.btn-reset {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.btn-reset:hover {
+    background: #e2e8f0;
+}
+
+.graphs-content {
+    flex: 1;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 25px;
+    align-content: start;
+}
+
+.graph-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.graph-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.graph-header {
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #2ec4e6 0%, #1a8bb8 100%);
+    color: white;
+    font-weight: 500;
+}
+
+.graph-container {
+    padding: 20px;
+    min-height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.graph-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.graphs-content img,
+.graphs-content canvas,
+.graphs-content svg {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    max-height: 400px; 
+}
+
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+}
+
+.no-data i {
+    font-size: 50px;
+    color: #cbd5e0;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 1200px) {
+    .graphs-content {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+    
+    .filter-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+    
+    .graphs-content {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-sidebar {
+        padding: 15px;
+    }
+    
+    .graphs-content {
+        padding: 15px;
+    }
+    
+    .graph-card {
+        min-width: 0;
+    }
+}
 
 /********************************************/
 /* Jeux de données */

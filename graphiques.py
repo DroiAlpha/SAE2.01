@@ -9,7 +9,7 @@ from random import *
 import folium as f
 from folium.plugins import HeatMap, HeatMapWithTime
 import numpy as np
-from Model.chroniques import Chroniques
+from Model.chroniques import *
 from io import BytesIO
 import base64
 from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
@@ -17,21 +17,41 @@ from Model.model import obtenir_info_prelevement, obtenir_info_ouvrage as db
 
 sns.set_theme(style='ticks')
 
-def sns_displot(liste: list, titre: str, x_label: str, y_label: str):
-    """
-    C'est l'histogramme
-    Utilisation de base64 et io pour pouvoir mettre l'image
-    dans une page web
-    """
-    data = pd.Series(liste)
-    sns.displot(data)
-    plt.title(titre)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+def histo_grouped(data, labels, categories, x_label, y_label, titre):
+    x = np.arange(len(labels))  # les positions des groupes
+    width = 0.8 / len(data)     # largeur des barres (adaptée selon le nombre de catégories)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    colors = ['cyan', 'deepskyblue', 'steelblue']
+    rects = []
+
+    for i in range(len(data)):
+        rect = ax.bar(x + (i - len(data)/2)*width + width/2, data[i], width, label=categories[i], color=colors[i % len(colors)])
+        rects.append(rect)
+
+    # Ajout des valeurs au-dessus des barres
+    for rect in rects:
+        for r in rect:
+            height = r.get_height()
+            ax.annotate(f'{height}',
+                        xy=(r.get_x() + r.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(titre)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+
     image_stream = BytesIO()
-    plt.savefig(image_stream, format='png')
+    plt.savefig(image_stream, format='png', bbox_inches='tight')
     plt.show()
     plt.close()
+
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
@@ -40,20 +60,13 @@ def sns_pie(data: list, labels: list, titre: str):
     C'est le diagramme circulaire
     """
     plt.figure(figsize=(6,6)) 
-    plt.pie(data, labels=labels)
+    plt.pie(data, labels=labels, autopct='%1.1f%%')
     plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
     plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    return f'data:image/png;base64,{image_base64}'
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-import base64
-from io import BytesIO
-import pandas as pd
+    return image_base64
 
 def sns_courbe_double(data1: list, data2: list, x_values: list, titre: str, x_label: str, y_label: str, label1="Courbe 1", label2="Courbe 2"):
     df1 = pd.DataFrame({'x': x_values, 'y': data1, 'serie': label1})
@@ -83,110 +96,54 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
     return f'data:image/png;base64,{image_base64}'
 
-def sns_horizontalbarplot(data: list,category, value ):
-    
-    df = pd.DataFrame(data)
-    
+def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y_label: str, titre: str):
     f, ax = plt.subplots(figsize=(6, 15))
-    
-    # X et Y sont les différentes colonnes que l'on souhaite
-    sns.barplot(x=value, y=category, data=df, ax=ax)
-
-    # * Y a que dieu qui sait ce que les trois lignes en dessous font
-    ax.legend(ncol=2, loc="lower right", frameon=True, ) # mettre les légendes
-    ax.set(xlim=(0, 24), ylabel="Contribution", xlabel="test") 
-    sns.despine(left=True, bottom=True) # ! JSP
+    sns.barplot(x=value, y=category, data=data, ax=ax)
+    ax.set(xlim=(0, data[value].max() * 1.1), ylabel=y_label, xlabel=x_label) 
+    sns.despine(left=True, bottom=True)
+    plt.title(titre)
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')
-    plt.show()
     plt.close()
     image_base64 = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    return f'data:image/png;base64,{image_base64}'
+    return image_base64
 
 # ------------------------------------------------------------- #
-# ---------------------- TESTS -------------------------------- #
+# ---------------------- GRAPHIQUES FINAUX ------------------------------ #
 # ------------------------------------------------------------- #
-
-don = [
-    {"cook": "chatgpt", "value": 10},
-    {"cook": "amaurrrr", "value": 15},
-    {"cook": "idriss", "value": 5}
-]
-
-Liste = [uniform(0,1.5) for _ in range(0,10000)]
-data = [30, 20, 50] # Données juste pour try
-labels = ['A', 'B', 'C'] # Nom pour chaque part.
-# sns_horizontalbarplot(don, 'cook' , 'value' )
-# sns_displot(Liste, "Titre", "Abscisse", "Ordonnées") 
-# sns_pie(data, labels, "Titre")
-# sns_courbe(data, "Titre", "Abscisse", "Ordonnées")
 
 chroniques = Chroniques()
 
-# ---- DIAGRAMME CIRCULAIRE ---- #
-data_usages = chroniques.usage2()
-# sns_pie(data_usages, chroniques.usage(), "Nombre d'ouvrages par usage")
+def diagramme_circu(data):
+    data_usages = data['libelle_usage'].value_counts()
+    return sns_pie(data_usages.values, data_usages.index, "Nombre d'ouvrages par usage")
 
-# ---- HISTOGRAMME ---- #
+def evo(data):
+    if len(data['libelle_usage'].unique()) >= 2:
+        usage_1 = data[data['libelle_usage'] == data['libelle_usage'].unique()[0]].groupby('annee')['volume'].sum()
+        usage_2 = data[data['libelle_usage'] == data['libelle_usage'].unique()[1]].groupby('annee')['volume'].sum()
+        return sns_courbe_double(usage_1.values, usage_2.values, usage_1.index, 
+                               "Volume par année", "Années", "Volumes",
+                               data['libelle_usage'].unique()[0], data['libelle_usage'].unique()[1])
+    return None
 
-usage_1 = chroniques.data_evo(chroniques.usage()[0], 10**(-3))
-usage_2 = chroniques.data_evo(chroniques.usage()[1], 1)
+def histo(data):
+    data_histo = data['libelle_departement'].value_counts().reset_index()
+    data_histo.columns = ['dep', 'value']
+    return sns_horizontalbarplot(data_histo, 'dep', 'value', 
+                                "Nombre d'ouvrages", "Départements", 
+                                "Nombre d'ouvrages par département")
 
-sns_courbe_double(usage_1, usage_2, chroniques.annee(), "Volume par annee", "Annees", "Volumes")
+def histo_horiz(data):
+    if 'milieu' in data.columns:
+        grouped = data.groupby(['libelle_usage', 'milieu'])['volume'].sum().unstack()
+        data_histo_2 = [grouped[col].values for col in grouped.columns]
+        return histo_grouped(data_histo_2, grouped.index, grouped.columns, 
+                           "Type de milieu", "Volume", 
+                           "Volumes par usage et par milieu")
+    return None
+# diagramme_circu() # filtrage pas faisable
+# evo()
+# histo()
+# histo_horiz()
 
-# sns_courbe(usage_1, chroniques.annee(), "Evolution du volume EAU POTABLE", "Annees", "Volumes")
-# sns_courbe(usage_2, chroniques.annee(), "Evolution du volume INDUSTRIE", "Annees", "Volumes")
-
-# for c in chroniques.usage():
-#     data_evo = chroniques.data_evo(c)
-#     sns_courbe(data_evo, chroniques.annee(), "Evolution du volume pour "+c, "Années", "Volume en m^3")
-
-# ----------------- CARTE ---------------------#
-
-chroniques = Chroniques()
-
-# ! J'ai pas réussi à faire celle qui est timed si quelqu'un a la foi de faire
-
-def heatmap(data: np.array, heat: str, map_obj: map):
-    """Fonction qui crée une heatmap selon l'argument que l'on souhaite"""
-    
-    localisation = [[c['latitude'], c['longitude'], c[heat]] for c in data]
-    HeatMap(localisation, radius=15).add_to(map_obj)
-
-m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
-
-heatmap(chroniques.donnees(), 'volume', m)
-
-
-import folium as f
-
-def map_prelevement(map_obj):
-    """
-    Ajoute les ouvrages sur la carte Folium avec les noms des points de prélèvement associés.
-    """
-    ouvrages = db.obtenir_info_ouvrage()
-    prelevements = db.obtenir_info_prelevement()
-    
-    for _, row in ouvrages.iterrows():
-        lat = row['latitude']
-        lon = row['longitude']
-
-        if pd.notna(lat) and pd.notna(lon):
-            popup_html = f'''
-                <b>{row['nom_ouvrage']}</b><br>
-                Code ouvrage : {row['code_ouvrage']}<br>
-                Département : {row['libelle_departement']}
-            '''
-            popup = f.Popup(popup_html, max_width=150, min_width=50)
-
-            # Taille réduite pour l'icône
-            icon = f.Icon(color='blue', icon='tint', prefix='fa')
-
-            f.Marker(
-                location=(lat, lon),
-                popup=popup,
-                icon=icon
-            ).add_to(map_obj)
-
-m = f.Map(location=(49.017561743666164, 6.022989879006374), zoom_start=6)
-m.save("map.html")
