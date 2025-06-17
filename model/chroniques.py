@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-import Model.model as db
+import model.model as db
 
 class Chroniques:
     def __init__(self):
