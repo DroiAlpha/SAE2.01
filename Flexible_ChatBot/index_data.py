@@ -6,15 +6,15 @@ from langchain_huggingface import HuggingFaceEmbeddings
 # Liste des pages à indexer
 def data_scraping():
     urls = [
-        "http://127.0.0.1:5000/",
-        "http://127.0.0.1:5000/tableau-bord/carte-prelevements",   
-        "http://127.0.0.1:5000/tableau-bord/evolution-temporelle",
-        "http://127.0.0.1:5000/jeux-donnees/chroniques",
-        "http://127.0.0.1:5000/jeux-donnees/points-prelevement",
-        "http://127.0.0.1:5000/jeux-donnees/ouvrages",
-        "http://127.0.0.1:5000/a-propos/manuel-utilisation",
-        "http://127.0.0.1:5000/a-propos/notre-equipe-projet",
-        "http://127.0.0.1:5000/contact"
+        "http://127.0.0.1:1000/",
+        "http://127.0.0.1:1000/tableau-bord/carte-prelevements",   
+        "http://127.0.0.1:1000/tableau-bord/evolution-temporelle",
+        "http://127.0.0.1:1000/jeux-donnees/chroniques",
+        "http://127.0.0.1:1000/jeux-donnees/points-prelevement",
+        "http://127.0.0.1:1000/jeux-donnees/ouvrages",
+        "http://127.0.0.1:1000/a-propos/manuel-utilisation",
+        "http://127.0.0.1:1000/a-propos/notre-equipe-projet",
+        "http://127.0.0.1:1000/contact"
     ]
 
     text = scrape_site(urls)

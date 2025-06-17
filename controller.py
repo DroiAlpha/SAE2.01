@@ -392,4 +392,4 @@ def chat():
 ################################
 
 if __name__ == '__main__':
-    app.run(debug=True, port=777) # Port chanceux la team
+    app.run(debug=False, port=1000) # Port chanceux la team

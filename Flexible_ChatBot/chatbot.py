@@ -28,7 +28,7 @@ db = None
 retriever = None
 
 # Définit le chemin du dossier de la base de vecteurs pour plus de clarté
-VECTODB_PATH = "vectordb"
+VECTODB_PATH = "Flexible_ChatBot/vectordb"
 INDEX_FAISS_FILE = os.path.join(VECTODB_PATH, "index.faiss") # Nom standard du fichier d'index FAISS
 
 print("\n--- Initialisation du Chatbot ---")
