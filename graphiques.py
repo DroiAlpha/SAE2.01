@@ -97,7 +97,7 @@ def sns_courbe(data: list, x_values: list, titre: str, x_label: str, y_label: st
     return f'data:image/png;base64,{image_base64}'
 
 def sns_horizontalbarplot(data: list, category: str, value: str, x_label: str, y_label: str, titre: str):
-    f, ax = plt.subplots(figsize=(18, 14))
+    f, ax = plt.subplots(figsize=(22, 14))
     sns.barplot(x=value, y=category, data=data, ax=ax)
     ax.set(xlim=(0, data[value].max() * 1.1), ylabel=y_label, xlabel=x_label) 
     sns.despine(left=True, bottom=True)

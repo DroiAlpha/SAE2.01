@@ -187,7 +187,6 @@ def tab_usages():
 
 
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
-@app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
 @cache.cached(timeout=300)
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
 def tab_evolution():
