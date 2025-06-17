@@ -22,7 +22,7 @@ def histo_grouped(data, labels, categories, x_label, y_label, titre):
     x = np.arange(len(labels))  # les positions des groupes
     width = 0.8 / len(data)     # largeur des barres (adaptée selon le nombre de catégories)
 
-    fig, ax = plt.subplots(figsize=(14, 12))
+    fig, ax = plt.subplots(figsize=(14, 8))
 
     colors = ['cyan', 'deepskyblue', 'steelblue']
     rects = []

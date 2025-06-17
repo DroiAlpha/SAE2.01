@@ -93,6 +93,22 @@
 
         <div class="graph-card">
             <div class="graph-header">
+                Volume d'eau par usage et milieu
+            </div>
+            <div class="graph-container">
+                {% if volumes_usage_milieu %}
+                    <img src="{{ volumes_usage_milieu }}" alt="Volume d'eau par usage et milieu">
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-water"></i>
+                        <p>Aucune donnée sur les milieux disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="graph-card">
+            <div class="graph-header">
                 Ouvrages par département
             </div>
             <div class="graph-container">
@@ -107,21 +123,6 @@
             </div>
         </div>
 
-        <div class="graph-card">
-            <div class="graph-header">
-                Volume d'eau par usage et milieu
-            </div>
-            <div class="graph-container">
-                {% if volumes_usage_milieu %}
-                    <img src="{{ volumes_usage_milieu }}" alt="Volume d'eau par usage et milieu">
-                {% else %}
-                    <div class="no-data">
-                        <i class="fas fa-water"></i>
-                        <p>Aucune donnée sur les milieux disponible</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

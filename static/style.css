@@ -428,11 +428,18 @@ h1 {
     flex: 1;
     padding: 30px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 25px;
     align-content: start;
+    width: 100%; 
 }
 
+.graphs-content .graph-card:nth-child(3):last-child {
+    grid-column: 1 / -1; 
+}
+.graphs-content .graph-card:nth-child(3):last-child .graph-container {
+    min-height: 600px;
+}
 .graph-card {
     background: white;
     border-radius: 10px;
@@ -456,6 +463,7 @@ h1 {
 .graph-container {
     padding: 20px;
     min-height: 350px;
+    max-width:  100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -475,59 +483,8 @@ h1 {
     object-fit: contain;
     display: block;
     margin: 0 auto;
-    max-height: 400px; 
+    max-height: 800px; 
 }
-
-
-.no-data {
-    text-align: center;
-    padding: 40px;
-    color: #718096;
-}
-
-.no-data i {
-    font-size: 50px;
-    color: #cbd5e0;
-    margin-bottom: 15px;
-}
-
-@media (max-width: 1200px) {
-    .graphs-content {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 992px) {
-    .dashboard-wrapper {
-        flex-direction: column;
-    }
-    
-    .filter-sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-    }
-    
-    .graphs-content {
-        grid-template-columns: 1fr;
-        padding: 20px;
-    }
-}
-
-@media (max-width: 576px) {
-    .filter-sidebar {
-        padding: 15px;
-    }
-    
-    .graphs-content {
-        padding: 15px;
-    }
-    
-    .graph-card {
-        min-width: 0;
-    }
-}
-
 /********************************************/
 /* Évolution */
 /********************************************/

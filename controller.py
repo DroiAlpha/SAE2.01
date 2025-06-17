@@ -12,7 +12,7 @@ from flask import Flask, render_template, request
 import matplotlib
 from flask_caching import Cache
 import time
-from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe
+from graphiques import sns_horizontalbarplot, sns_pie, sns_courbe, histo_horiz
 import Model.model as db
 from Model.chroniques import *
 import folium
@@ -83,7 +83,7 @@ def tab_carte():
     )
 
 @app.route('/api/map-data')
-@cache.cached(timeout=300)
+@cache.cached(timeout=500)
 def get_map_data():
     """Api pour récupérer les données de la carte des prélèvements"""
     ouvrages = db.obtenir_info_ouvrage()
@@ -122,6 +122,7 @@ def get_map_data():
     
 # Route pour la page des graphiques sur les usages de l'eau "tab_usages.html"
 @app.route('/tableau-bord/usages-eau', methods=['GET', 'POST'])
+@cache.cached(timeout=10)
 def tab_usages():
     chroniques = Chroniques()
     data = pd.DataFrame(chroniques.donnees())
@@ -134,34 +135,38 @@ def tab_usages():
         "nom_ouvrage": request.form.get("nom_ouvrage")
     } if request.method == 'POST' else None
 
-    # Apply filters
+    # Prepare filter lists for histo_horiz
+    filter_cols = []
+    filter_vals = []
     if filters:
-        filtered_data = data.copy()
         if filters["annee"]:
-            filtered_data = filtered_data[filtered_data['annee'] == int(filters["annee"])]
+            filter_cols.append('annee')
+            filter_vals.append(int(filters["annee"]))
         if filters["libelle_usage"]:
-            filtered_data = filtered_data[filtered_data['libelle_usage'] == filters["libelle_usage"]]
+            filter_cols.append('libelle_usage')
+            filter_vals.append(filters["libelle_usage"])
         if filters["nom_commune"]:
-            filtered_data = filtered_data[filtered_data['nom_commune'] == filters["nom_commune"]]
+            filter_cols.append('nom_commune')
+            filter_vals.append(filters["nom_commune"])
         if filters["libelle_departement"]:
-            filtered_data = filtered_data[filtered_data['libelle_departement'] == filters["libelle_departement"]]
+            filter_cols.append('libelle_departement')
+            filter_vals.append(filters["libelle_departement"])
         if filters["nom_ouvrage"]:
-            filtered_data = filtered_data[filtered_data['nom_ouvrage'] == filters["nom_ouvrage"]]
-    else:
-        filtered_data = data
+            filter_cols.append('nom_ouvrage')
+            filter_vals.append(filters["nom_ouvrage"])
 
-    if not filtered_data.empty:
-
-        usage_counts = filtered_data['libelle_usage'].value_counts()
+    if not data.empty:
+        usage_counts = data['libelle_usage'].value_counts()
         diagramme_circulaire = f'data:image/png;base64,{sns_pie(usage_counts.values, usage_counts.index, "Répartition des usages")}'
         
-        # histogramme horizontal
-        hist_data = filtered_data['libelle_departement'].value_counts().reset_index()
+        hist_data = data['libelle_departement'].value_counts().reset_index()
         hist_data.columns = ['dep', 'value']
         histogrammehorizon = f'data:image/png;base64,{sns_horizontalbarplot(hist_data, "dep", "value", "Nombre d ouvrages", "Départements", "Nombre d ouvrages par département")}'
         
-        # Volume par usage/environment
-        volumes_usage_milieu = f'data:image/png;base64,{histo_horiz(chroniques.colonnes())}'
+        # Corrected histo_horiz call
+        histo_img = histo_horiz(filter_cols if filter_cols else None, 
+                               filter_vals if filter_vals else None)
+        volumes_usage_milieu = f'data:image/png;base64,{histo_img}' if histo_img else None
         
     else:
         diagramme_circulaire = None
