@@ -188,39 +188,58 @@ def tab_usages():
         sub_header_template="dashboard.html"
     )
 
-
 # Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
 @app.route('/tableau-bord/evolution-temporelle', methods=['GET', 'POST'])
-@cache.cached(timeout=300)
+# @cache.cached(timeout=300)
 def tab_evolution():
     """
     Route pour la page du graphique sur évolution temporelle du volume d'eau prélevé "tab_evolution.html"
-    Affiche un graphique linéaire multiple sur l'évolution des volumes d'eau prélevés pour un ouvrage spécifique
-    Chaque ouvrage est représenté par une courbe, et l'utilisateur peut choisir l'ouvrage à afficher
+    Affiche un graphique linéaire multiple filtrable par année, usage, et nom d'ouvrage
     """
-
     chroniques = Chroniques()
     data = pd.DataFrame(chroniques.donnees())
-    available_ouvrages=data['nom_ouvrage'].unique()
-    graphique = evo()
-    nom_ouvrage = 'AUDELONCOURT'
+    available_ouvrages = data['nom_ouvrage'].unique()
     years = chroniques.annee()
     usages = chroniques.usage()
 
+    # Valeurs par défaut
+    nom_ouvrage = 'AUDELONCOURT'
+    annee = None
+    colonne_filtre = []
+    valeur_filtre = []
+
     if request.method == 'POST':
-        nom_ouvrage = request.form.get("nom_ouvrage")
+        # Récupérer les filtres s'ils sont soumis
+        nom_ouvrage = request.form.get('available_ouvrages')
+        annee = request.form.get('annee')
+
+        # Ajouter aux filtres si sélectionné
+        if nom_ouvrage:
+            colonne_filtre.append('nom_ouvrage')
+            valeur_filtre.append(nom_ouvrage)
+        if annee:
+            colonne_filtre.append('annee')
+            valeur_filtre.append(annee)
+
+    # Génération du graphique avec ou sans filtres
+    if colonne_filtre and valeur_filtre:
+        graphique = evo(colonne_filtre, valeur_filtre)
+    else:
+        graphique = evo()
 
     return render_template(
         'tab_evolution.html',
         graphique=graphique,
-        years = years,
-        usages = usages,
-        available_ouvrages = available_ouvrages,
-        nom_ouvrage=nom_ouvrage, 
-        page_title="Tableau de bord", 
+        years=years,
+        usages=usages,
+        available_ouvrages=available_ouvrages,
+        nom_ouvrage=nom_ouvrage,
+        page_title="Tableau de bord",
         page_sub_title="Évolution temporelle",
         sub_header_template="dashboard.html"
     )
+
+
 
 ################################
 # JEUX DE DONNÉES
