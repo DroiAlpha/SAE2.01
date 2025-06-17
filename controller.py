@@ -39,7 +39,7 @@ app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 cache.init_app(app)
 # Assure la compatibilité de Matplotlib avec Flask
 matplotlib.use('Agg')
-
+# Configuration de l'application Flask
 # Route pour tester si Redis fonctionne si ça fonctionne la page va montrer le même temps pendant 10 secondes puis changer
 
 #####################################################################
