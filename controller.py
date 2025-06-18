@@ -28,7 +28,7 @@ load_dotenv() # Appelle cette fonction au début de ton fichier si tu utilises .
 # Importation du serveur Redis hébergé sur la VM pour le cache
 
 app.config['CACHE_TYPE'] = 'RedisCache'
-app.config['CACHE_REDIS_HOST'] = '192.168.0.36'
+app.config['CACHE_REDIS_HOST'] = '192.168.1.24'
 app.config['CACHE_REDIS_PORT'] = 6379
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
