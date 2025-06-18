@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # Crée un engine SQLAlchemy UNE SEULE FOIS (en global)
-engine = create_engine("postgresql+psycopg2://yuri:yuri@192.168.1.60:5432/eaufrance")
+engine = create_engine("postgresql+psycopg2://yuri:yuri@192.168.0.41:5432/eaufrance")
 
 def fct_condition(filtres: dict):
     conditions = []

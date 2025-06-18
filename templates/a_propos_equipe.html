@@ -2,7 +2,8 @@
 
 {% block content %}
 <section class="team-container">
-
+  <!-- Première ligne avec 3 cartes -->
+  <div class="team-grid">
     <div class="team-member">
       <div class="member-card-content">
         <div class="member-icon">
@@ -14,21 +15,19 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="team-member">
-    <div class="member-card-content">
-      <div class="member-icon">
-        <img src="{{ url_for('static', filename='images/6012 - Massinissa Guerrouah.jpg') }}" alt="Photo de Massinissa Guerrouah">
-      </div>
-      <div class="member-info">
-        <h3>Massinissa</h3>
-        <p>"La passion facilite le travail."</p>
+    <div class="team-member">
+      <div class="member-card-content">
+        <div class="member-icon">
+          <img src="{{ url_for('static', filename='images/6012 - Massinissa Guerrouah.jpg') }}" alt="Photo de Massinissa Guerrouah">
+        </div>
+        <div class="member-info">
+          <h3>Massinissa</h3>
+          <p>"La passion facilite le travail."</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="team-grid">
     <div class="team-member">
       <div class="member-card-content">
         <div class="member-icon">
@@ -40,7 +39,10 @@
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- Deuxième ligne avec 3 cartes -->
+  <div class="team-grid">
     <div class="team-member">
       <div class="member-card-content">
         <div class="member-icon">
@@ -76,6 +78,6 @@
         </div>
       </div>
     </div>
-
+  </div>
 </section>
 {% endblock %}

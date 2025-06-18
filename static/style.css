@@ -1069,10 +1069,10 @@ h1 {
 .team-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 3 colonnes égales */
-    gap: 2.5rem;
-    justify-items: center; /* Centre les cartes horizontalement */
+    gap: 3rem 4rem; /* gap: ligne colonne (vertical horizontal) */
+    justify-items: center;
+    margin: 1.1rem 0; /* Espacement global haut/bas */
 }
-
 /* --- Style de la carte membre --- */
 .team-member {
     background-color: #ffffff;
