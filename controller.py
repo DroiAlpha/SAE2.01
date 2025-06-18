@@ -50,7 +50,6 @@ with app.app_context():
 
 # Route pour la page d'accueil "index.html"
 @app.route("/")
-@cache.cached(timeout=3600)
 def accueil():
     """
     Fonction de définition de l'adresse de la page d'accueil "index.html"
